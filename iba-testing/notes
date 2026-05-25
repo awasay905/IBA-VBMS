@@ -34,3 +34,11 @@ pm.collectionVariables.set("student_user_id", json.user.id);
 which saves the token to the memory, so in further requestrs we can use it. 
 All other requests in the collection should set their Authorization header to:
 Bearer {{token}}
+
+I am using a seperate folder for tests, and some unit test cause module imports issues, 
+the fix i found was to create a seperaete entry in moduleNameMapper in jest config
+but for now I found a better one which tries to load all modules from backend, 
+otherwise fall back to mapper. In case there are issues later on, try to 
+manually map liek this 
+// Direct Jest to use the backend's bcryptjs so that mocked values apply to both projects
+        "^bcryptjs$": "<rootDir>/../iba-backend/node_modules/bcryptjs", 
