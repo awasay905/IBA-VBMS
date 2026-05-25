@@ -1,0 +1,25 @@
+{
+  "name": "iba-testing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nestjs/testing": "^11.1.23",
+    "@playwright/test": "^1.60.0",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^7.2.0",
+    "dotenv": "^17.4.2",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
