@@ -42,3 +42,10 @@ otherwise fall back to mapper. In case there are issues later on, try to
 manually map liek this 
 // Direct Jest to use the backend's bcryptjs so that mocked values apply to both projects
         "^bcryptjs$": "<rootDir>/../iba-backend/node_modules/bcryptjs", 
+
+
+        3. bookings.service.test.ts — cancel maps to "rejected" not "cancelled"
+typescript// Your test expects:
+status: "rejected", // Acts as cancelled
+You noted this yourself with the comment. This is actually a real defect in the backend — cancel() calls updateStatus(id, 'rejected', ...) which sets status to "rejected" instead of "cancelled". Your test is correctly mirroring the buggy behaviour, but you should log this as a defect:
+DEF-006 | TC-CANCEL-001 | S3 | cancel() sets status to "rejected" instead of "cancelled"

@@ -111,7 +111,7 @@ describe("AuthService", () => {
             name: "PO Manager",
             email: "po@test.com",
             password: "hashed-password-in-db",
-            role: "po",
+            role: "programoffice",
         };
         mockQueryBuilder.single.mockResolvedValue({ data: mockDbUser, error: null });
         (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -124,13 +124,13 @@ describe("AuthService", () => {
             erp: "po-staff-1",
             name: "PO Manager",
             email: "po@test.com",
-            role: "po",
+            role: "programoffice",
         });
 
         expect(mockJwtService.sign).toHaveBeenCalledWith({
             sub: "po-uuid",
             erp: "po-staff-1",
-            role: "po",
+            role: "programoffice",
         });
     });
 

@@ -123,4 +123,16 @@ describe("BuildingsService", () => {
         expect(mockQueryBuilder.eq).toHaveBeenCalledWith("id", "building-uuid-to-delete");
         expect(result).toEqual({ message: "Building and all its rooms deleted" });
     });
+
+    // Test Case: remove — DB error path (e.g. FK violation)
+    it("should throw the database error when remove fails due to a constraint violation", async () => {
+        const dbError = new Error("FK violation: rooms still reference this building");
+        mockQueryBuilder.then.mockImplementation((resolve) => resolve({ data: null, error: dbError }));
+
+        await expect(service.remove("building-uuid-fk-fail")).rejects.toThrow(dbError);
+
+        expect(mockSupabaseService.db.from).toHaveBeenCalledWith("buildings");
+        expect(mockQueryBuilder.delete).toHaveBeenCalled();
+        expect(mockQueryBuilder.eq).toHaveBeenCalledWith("id", "building-uuid-fk-fail");
+    });
 });

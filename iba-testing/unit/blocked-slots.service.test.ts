@@ -116,7 +116,33 @@ describe("BlockedSlotsService", () => {
         expect(result).toEqual({ message: "Slot unblocked" });
     });
 
-    // Test Case 5: Error handling scenario
+    // Test Case 5: Idempotency — duplicate slot in slot_ids (TC-ADMIN-006)
+    it("should call upsert without throwing when a slot_id is already blocked (TC-ADMIN-006 idempotency)", async () => {
+        const adminId = "admin-uuid-123";
+        const dto: CreateBlockedSlotDto = {
+            room_id: "room-uuid-abc",
+            date: "2026-06-01",
+            slot_ids: [2], // slot 2 is already blocked in the DB
+            reason: "AC Maintenance",
+        };
+
+        const expectedRows = [
+            { room_id: "room-uuid-abc", date: "2026-06-01", slot_id: 2, reason: "AC Maintenance", blocked_by: adminId },
+        ];
+
+        // Simulate DB silently skipping the duplicate and returning the existing row
+        const mockResponseData = [{ id: "blocked-uuid-existing", ...expectedRows[0], created_at: new Date().toISOString() }];
+        mockQueryBuilder.then.mockImplementation((resolve) => resolve({ data: mockResponseData, error: null }));
+
+        // Should resolve without throwing despite the conflict
+        await expect(service.create(adminId, dto)).resolves.toEqual(mockResponseData);
+
+        expect(mockQueryBuilder.upsert).toHaveBeenCalledWith(expectedRows, {
+            onConflict: "room_id,date,slot_id",
+        });
+    });
+
+    // Test Case 6: Error handling scenario
     it("should throw database error when query execution fails", async () => {
         const mockError = new Error("Database query failed");
 
