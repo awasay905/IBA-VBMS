@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "node16",
+        "moduleResolution": "node16",
         "target": "ES2021",
         "lib": ["ES2021"],
         "strict": false,
@@ -8,6 +9,7 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
+        "isolatedModules": true,
         "types": ["jest"], 
         "paths": {
             "@backend/*": ["../iba-backend/src/*"]

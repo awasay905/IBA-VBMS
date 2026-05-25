@@ -11,6 +11,8 @@ const commonConfig = {
     },
     moduleNameMapper: {
         "^@backend/(.*)$": "<rootDir>/../iba-backend/src/$1",
+        // Direct Jest to use the backend's node_modules to ensure all @nestjs modules exist and are singletons
+        "^@nestjs/(.*)$": "<rootDir>/../iba-backend/node_modules/@nestjs/$1",
     },
 };
 
