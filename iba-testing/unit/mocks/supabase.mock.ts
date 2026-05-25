@@ -8,6 +8,9 @@ export const createMockQueryBuilder = () => ({
     in: jest.fn().mockReturnThis(),
     order: jest.fn().mockReturnThis(),
     single: jest.fn(),
+    upsert: jest.fn().mockReturnThis(),
+    // Mocking 'then' allows us to easily handle 'await queryBuilder'
+    then: jest.fn((resolve) => resolve({ data: [], error: null })),
 });
 
 // 2. Create the mock Supabase service that returns your builder
