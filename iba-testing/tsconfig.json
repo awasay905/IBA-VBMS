@@ -8,10 +8,11 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "skipLibCheck": true,
+        "types": ["jest"], 
         "paths": {
             "@backend/*": ["../iba-backend/src/*"]
         },
-        "rootDir": "./",
+        "rootDir": "../",
         "outDir": "./dist"
     },
     "include": ["unit/**/*", "integration/**/*"],

@@ -1,7 +1,5 @@
-import type { Config } from "jest";
-
-const config: Config = {
-    rootDir: ".",
+// Define the common TypeScript configuration that both projects must share
+const commonConfig = {
     testEnvironment: "node",
     transform: {
         "^.+\\.ts$": [
@@ -14,12 +12,18 @@ const config: Config = {
     moduleNameMapper: {
         "^@backend/(.*)$": "<rootDir>/../iba-backend/src/$1",
     },
+};
+
+module.exports = {
+    rootDir: ".",
     projects: [
         {
+            ...commonConfig,
             displayName: "unit",
             testMatch: ["<rootDir>/unit/**/*.test.ts"],
         },
         {
+            ...commonConfig,
             displayName: "integration",
             testMatch: ["<rootDir>/integration/**/*.test.ts"],
         },
@@ -27,5 +31,3 @@ const config: Config = {
     collectCoverage: false,
     verbose: true,
 };
-
-export default config;
