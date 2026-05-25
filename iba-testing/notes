@@ -24,3 +24,13 @@ to reset db to how it was before test, simply run db:init
 
 
 we are using playwright instead of selenium
+
+
+in postman, I have done 
+const json = pm.response.json();
+pm.collectionVariables.set("token", json.access_token);
+pm.collectionVariables.set("student_user_id", json.user.id);
+
+which saves the token to the memory, so in further requestrs we can use it. 
+All other requests in the collection should set their Authorization header to:
+Bearer {{token}}

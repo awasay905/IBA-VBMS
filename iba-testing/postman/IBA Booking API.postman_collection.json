@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "1612bee7-32fb-4728-8f48-ac95987c2b38",
+    "name": "IBA Booking API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38676419"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// This runs automatically after you click 'Send'\r",
+                  "const json = pm.response.json();\r",
+                  "\r",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {\r",
+                  "    pm.collectionVariables.set(\"token\", json.access_token);\r",
+                  "    pm.collectionVariables.set(\"student_user_id\", json.user.id);\r",
+                  "    console.log(\"Token captured and saved to collection variables!\");\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bookings - Student",
+      "item": []
+    },
+    {
+      "name": "Bookings - PO",
+      "item": []
+    },
+    {
+      "name": "Admin - Users",
+      "item": []
+    },
+    {
+      "name": "Admin - Buildings",
+      "item": []
+    },
+    {
+      "name": "Admin - Rooms",
+      "item": []
+    },
+    {
+      "name": "Blocked Slots",
+      "item": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
