@@ -49,3 +49,15 @@ typescript// Your test expects:
 status: "rejected", // Acts as cancelled
 You noted this yourself with the comment. This is actually a real defect in the backend — cancel() calls updateStatus(id, 'rejected', ...) which sets status to "rejected" instead of "cancelled". Your test is correctly mirroring the buggy behaviour, but you should log this as a defect:
 DEF-006 | TC-CANCEL-001 | S3 | cancel() sets status to "rejected" instead of "cancelled"
+
+
+
+## Defects you will discover during integration testing
+
+Add these to `DEFECTS.md` as you encounter them:
+
+| Defect ID | TC | What you observe |
+|---|---|---|
+| DEF-006 | TC-CANCEL-001 | Cancel sets status to `rejected` instead of `cancelled` |
+| DEF-007 | TC-BOOK-008 | Check whether past dates are accepted — if yes, log it |
+| DEF-008 | TC-PO-004 | Two pending bookings for same slot cannot coexist due to DB constraint — the conflict resolution scenario in the test plan cannot be reproduced as described |

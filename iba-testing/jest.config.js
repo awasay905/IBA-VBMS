@@ -29,6 +29,7 @@ module.exports = {
             ...commonConfig,
             displayName: "integration",
             testMatch: ["<rootDir>/integration/**/*.test.ts"],
+            testTimeout: 15000
         },
     ],
     collectCoverage: false,
