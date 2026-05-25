@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2021",
+        "lib": ["ES2021"],
+        "strict": false,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
+        "paths": {
+            "@backend/*": ["../iba-backend/src/*"]
+        },
+        "rootDir": "./",
+        "outDir": "./dist"
+    },
+    "include": ["unit/**/*", "integration/**/*"],
+    "exclude": ["node_modules", "e2e"]
+}
