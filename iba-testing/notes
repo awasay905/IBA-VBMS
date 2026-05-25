@@ -1,0 +1,26 @@
+env file contains the 
+supabase url: just the url ofthe supabase project
+supabase service role kjey: legacy api key  private from the supabase project
+
+together these two allows the backend to connect to the db 
+
+jwt secret is used to sign jwt tokne,s they can be anything random 
+
+pass is the defualt password used in the original seed scrit 
+
+frontned url is the full url where the frontned is runnign along with the port. by default it is normally 5173 
+
+database url is the full subapase conenction string, it is used to seed the db 
+
+seeding:
+there are 2 types of seeding 
+1. npm run db:init : this drop severythign and seeds all the data in the orignal seed script, which is in ./test-data/init.sql . used to restore the app to the fresh state
+2. npm run db:seed : this scripts clears all data and only installs the testing data 
+
+togther these 2 will be used to setup the db to a testable state 
+warning only do it in test db not in production 
+
+to reset db to how it was before test, simply run db:init
+
+
+we are using playwright instead of selenium
