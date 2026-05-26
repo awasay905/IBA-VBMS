@@ -56,7 +56,7 @@ INSERT INTO
     buildings (id, name, location)
 VALUES
     (
-        '99999999-9999-9999-9999-999999999999',
+        '99999999-9999-4999-8999-999999999999',
         'Test Building',
         'Main Campus'
     );
@@ -67,15 +67,15 @@ INSERT INTO
     rooms (id, building_id, name, capacity, type)
 VALUES
     (
-        'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-        '99999999-9999-9999-9999-999999999999',
+        'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        '99999999-9999-4999-8999-999999999999',
         'Test Room A',
         30,
         'Classroom'
     ),
     (
-        'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-        '99999999-9999-9999-9999-999999999999',
+        'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        '99999999-9999-4999-8999-999999999999',
         'Test Room B',
         20,
         'Meeting Room'
@@ -88,7 +88,7 @@ INSERT INTO
     bookings (user_id, room_id, slot_id, date, purpose, status)
 SELECT
     id,
-    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     1,
     current_date + INTERVAL '7 days',
     'Existing Booking for Conflict Test',

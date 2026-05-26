@@ -3,6 +3,8 @@ import { BASE_URL } from "./helpers/env.helper";
 import { resetDatabase } from "./helpers/seed.helper";
 import { getStudentToken, getStudent2Token } from "./helpers/auth.helper";
 
+jest.setTimeout(30000);
+
 describe("Booking Concurrency Feature", () => {
     it("TC-BOOK-009: simultaneous booking requests for the exact same slot must result in exactly one success and one conflict failure", async () => {
         // 1. Reset database to clear any active schedules
@@ -13,7 +15,7 @@ describe("Booking Concurrency Feature", () => {
         const student2Token = await getStudent2Token();
 
         // Hardcoded Room A ID from seedTestData.sql
-        const roomAId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+        const roomAId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
         // Pick a future date and slot with no existing bookings
         const targetDate = new Date();

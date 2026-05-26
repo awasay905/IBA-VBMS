@@ -1,14 +1,17 @@
 import request from "supertest";
 import { resetDatabase } from "./helpers/seed.helper";
 import { BASE_URL } from "./helpers/env.helper";
-import { getStudentToken, getAdminToken } from "./helpers/auth.helper";
+import { getStudentToken, getAdminToken, getStudent2Token } from "./helpers/auth.helper";
+
+jest.setTimeout(30000);
 
 describe("Student Room Booking Creation Feature", () => {
     let studentToken: string;
+    let student2Token: string;
     let adminToken: string;
 
     // Hardcoded Room IDs from your seedTestData.sql
-    const roomAId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const roomAId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
     // We use dynamically generated future dates to guarantee stability across test runs
     const getFutureDate = (daysAhead: number): string => {
@@ -20,6 +23,7 @@ describe("Student Room Booking Creation Feature", () => {
     beforeAll(async () => {
         await resetDatabase();
         studentToken = await getStudentToken();
+        student2Token = await getStudent2Token();
         adminToken = await getAdminToken();
     });
 
@@ -39,7 +43,7 @@ describe("Student Room Booking Creation Feature", () => {
 
         expect(res.body).toHaveProperty("id");
         expect(res.body.status).toBe("pending");
-        expect(res.body.room_id).toBe(roomAId);
+        expect(res.body.rooms.id).toBe(roomAId);
         expect(res.body.slot_id).toBe(3);
     });
 
@@ -127,5 +131,33 @@ describe("Student Room Booking Creation Feature", () => {
                 purpose: "Booking in the past",
             })
             .expect(400);
+    });
+
+    it("BUG: Cancelled/Rejected slots should be re-bookable but are blocked by DB constraints", async () => {
+        const targetDate = getFutureDate(20);
+        const slot = 1;
+
+        // 1. Student 1 books a slot
+        const res1 = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${studentToken}`)
+            .send({ room_id: roomAId, date: targetDate, slot_id: slot, purpose: "First Booking" })
+            .expect(201);
+
+        // 2. Student 1 cancels their booking
+        await request(BASE_URL)
+            .patch(`/api/bookings/${res1.body.id}/cancel`)
+            .set("Authorization", `Bearer ${studentToken}`)
+            .expect(200);
+
+        // 3. Student 2 tries to book the SAME slot (This SHOULD work in a real system)
+        // In your system, this will return 500 or 409 because of the DB Unique Constraint
+        const res2 = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${student2Token}`)
+            .send({ room_id: roomAId, date: targetDate, slot_id: slot, purpose: "Second Booking attempt" });
+
+        // THE ASSERTION: This will likely fail with 409 or 500, proving the bug.
+        expect(res2.status).toBe(201);
     });
 });

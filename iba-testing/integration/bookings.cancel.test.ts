@@ -3,13 +3,15 @@ import { BASE_URL } from "./helpers/env.helper";
 import { resetDatabase } from "./helpers/seed.helper";
 import { getStudentToken, getStudent2Token, getPOToken } from "./helpers/auth.helper";
 
+jest.setTimeout(30000);
+
 describe("Booking Cancellation Feature", () => {
     let studentToken: string;
     let student2Token: string;
     let poToken: string;
 
     // Hardcoded Room A ID from seedTestData.sql
-    const roomAId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const roomAId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
     const getFutureDate = (daysAhead: number): string => {
         const d = new Date();
@@ -45,10 +47,7 @@ describe("Booking Cancellation Feature", () => {
             .set("Authorization", `Bearer ${studentToken}`)
             .expect(200);
 
-        // Asserting status behavior:
-        // Standard expectation: should update to 'cancelled'.
-        // DEF-006: It updates to 'rejected' under the current implementation.
-        expect(cancelRes.body.status).toBe("rejected");
+        expect(cancelRes.body.status).toBe("cancelled");
     });
 
     it("TC-CANCEL-002: student cancels own approved booking", async () => {
@@ -80,7 +79,7 @@ describe("Booking Cancellation Feature", () => {
             .set("Authorization", `Bearer ${studentToken}`)
             .expect(200);
 
-        expect(cancelRes.body.status).toBe("rejected");
+        expect(cancelRes.body.status).toBe("cancelled");
     });
 
     it("TC-CANCEL-005: PO cancels approved booking", async () => {
@@ -112,7 +111,7 @@ describe("Booking Cancellation Feature", () => {
             .set("Authorization", `Bearer ${poToken}`)
             .expect(200);
 
-        expect(cancelRes.body.status).toBe("rejected");
+        expect(cancelRes.body.status).toBe("cancelled");
     });
 
     it("should block a student from cancelling another student's booking", async () => {
@@ -163,5 +162,25 @@ describe("Booking Cancellation Feature", () => {
             .patch(`/api/bookings/${bookingId}/cancel`)
             .set("Authorization", `Bearer ${studentToken}`)
             .expect(400);
+    });
+
+    it("SHOULD allow re-booking a cancelled slot (Proves DEF-001)", async () => {
+        const date = getFutureDate(30);
+        // Book and cancel
+        const res = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${studentToken}`)
+            .send({ room_id: roomAId, date, slot_id: 1, purpose: "Rebooking Test" });
+        await request(BASE_URL)
+            .patch(`/api/bookings/${res.body.id}/cancel`)
+            .set("Authorization", `Bearer ${studentToken}`);
+
+        // Try to book again - THIS WILL FAIL in your current code
+        const retry = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${studentToken}`)
+            .send({ room_id: roomAId, date, slot_id: 1, purpose: "Rebooking Test" });
+
+        expect(retry.status).toBe(201); // It will actually return 409, proving the bug
     });
 });

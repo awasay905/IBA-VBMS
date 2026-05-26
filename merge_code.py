@@ -1,7 +1,7 @@
 import os
 
 # Configuration
-TARGET_FOLDERS = ['iba-backend', 'iba-booking-frontend']
+TARGET_FOLDERS = ['iba-backend', 'iba-booking-frontend', 'iba-testing']
 OUTPUT_FILE = 'merged_code.txt'
 
 # Exclusion lists

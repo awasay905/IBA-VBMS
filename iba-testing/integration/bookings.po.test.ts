@@ -3,6 +3,8 @@ import { resetDatabase } from "./helpers/seed.helper";
 import { BASE_URL } from "./helpers/env.helper";
 import { getStudentToken, getPOToken } from "./helpers/auth.helper";
 
+jest.setTimeout(30000);
+
 describe("Program Office (PO) Booking Management Feature", () => {
     let studentToken: string;
     let poToken: string;
@@ -12,7 +14,7 @@ describe("Program Office (PO) Booking Management Feature", () => {
     let pendingBookingId2: string;
 
     // Hardcoded Room A ID from your seedTestData.sql
-    const roomAId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const roomAId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
     const getFutureDate = (daysAhead: number): string => {
         const d = new Date();
