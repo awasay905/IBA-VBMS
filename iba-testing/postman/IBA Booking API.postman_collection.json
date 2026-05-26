@@ -7,23 +7,375 @@
   },
   "item": [
     {
-      "name": "Auth",
+      "name": "1. Auth",
       "item": [
         {
-          "name": "Login",
+          "name": "Student Login (TC-AUTH-001)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "// This runs automatically after you click 'Send'\r",
-                  "const json = pm.response.json();\r",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"Has access_token\", () => pm.expect(pm.response.json().access_token).to.be.a('string'));\r",
+                  "pm.test(\"Role is student\", () => pm.expect(pm.response.json().user.role).to.equal('student'));\r",
+                  "pm.test(\"No password in response\", () => pm.expect(pm.response.json().user).to.not.have.property('password'));\r",
                   "\r",
-                  "if (pm.response.code === 200 || pm.response.code === 201) {\r",
-                  "    pm.collectionVariables.set(\"token\", json.access_token);\r",
-                  "    pm.collectionVariables.set(\"student_user_id\", json.user.id);\r",
-                  "    console.log(\"Token captured and saved to collection variables!\");\r",
-                  "}"
+                  "// Save token and user ID for subsequent requests\r",
+                  "pm.environment.set(\"token\", pm.response.json().access_token);\r",
+                  "pm.environment.set(\"student_id\", pm.response.json().user.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"erp\": \"test-student\", \"password\": \"testpass\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PO Login (TC-AUTH-002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"Has access_token\", () => pm.expect(pm.response.json().access_token).to.be.a('string'));\r",
+                  "pm.test(\"Role is student\", () => pm.expect(pm.response.json().user.role).to.equal('programoffice'));\r",
+                  "pm.test(\"No password in response\", () => pm.expect(pm.response.json().user).to.not.have.property('password'));\r",
+                  "\r",
+                  "pm.environment.set(\"po_token\", pm.response.json().access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"erp\": \"test-po\", \"password\": \"testpass\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"Has access_token\", () => pm.expect(pm.response.json().access_token).to.be.a('string'));\r",
+                  "pm.test(\"Role is student\", () => pm.expect(pm.response.json().user.role).to.equal('programoffice'));\r",
+                  "pm.test(\"No password in response\", () => pm.expect(pm.response.json().user).to.not.have.property('password'));\r",
+                  "\r",
+                  "pm.environment.set(\"admin_token\", pm.response.json().access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"erp\": \"test-admin\", \"password\": \"testpass\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Credentials (TC-AUTH-003)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));\r",
+                  "pm.test(\"No token returned\", () => pm.expect(pm.response.json()).to.not.have.property('access_token'));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"erp\": \"nobody\", \"password\": \"wrong\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "No Token on Protected Route (TC-AUTH-004)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Buildings",
+      "item": [
+        {
+          "name": "List Buildings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();\r",
+                  "\r",
+                  "// 1. Basic Status Check\r",
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r",
+                  "\r",
+                  "// 2. Data Integrity Check (Matching seedTestData.sql)\r",
+                  "pm.test(\"Response contains the Seed Building\", () => {\r",
+                  "    // Find the building we inserted via SQL\r",
+                  "    const testBuilding = jsonData.find(b => b.name === \"Test Building\");\r",
+                  "    \r",
+                  "    pm.expect(testBuilding).to.be.ok; // Asserts the building was found\r",
+                  "    pm.expect(testBuilding.location).to.equal(\"Main Campus\");\r",
+                  "    \r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Seed Building contains nested rooms from SQL\", () => {\r",
+                  "    const testBuilding = jsonData.find(b => b.name === \"Test Building\");\r",
+                  "    \r",
+                  "    // The backend BuildingsService joins the rooms table\r",
+                  "    pm.expect(testBuilding.rooms).to.be.an('array');\r",
+                  "    \r",
+                  "    const roomNames = testBuilding.rooms.map(r => r.name);\r",
+                  "    pm.expect(roomNames).to.include(\"Test Room A\");\r",
+                  "    pm.expect(roomNames).to.include(\"Test Room B\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/buildings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "buildings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Building (Admin) (TC-ADMIN-004)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\r",
+                  "pm.environment.set(\"building_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Postman Test Building\", \"location\": \"Test Wing\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/buildings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "buildings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Student Cannot Add Building (TC-AUTH-005)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 403 Forbidden\", () => pm.response.to.have.status(403));"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -33,37 +385,739 @@
           ],
           "request": {
             "method": "POST",
-            "header": []
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Student Test Building\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/buildings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "buildings"
+              ]
+            }
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Bookings - Student",
-      "item": []
+      "name": "3. Rooms",
+      "item": [
+        {
+          "name": "Add Room (Admin) (TC-ADMIN-005)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\r",
+                  "pm.environment.set(\"room_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"building_id\": \"{{building_id}}\",\r\n  \"name\": \"Postman Test Room\",\r\n  \"capacity\": 30,\r\n  \"type\": \"Classroom\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Room Availability",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rooms/{{room_id}}/availability?date=2026-06-15",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rooms",
+                "{{room_id}}",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-06-15"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Bookings - PO",
-      "item": []
+      "name": "4. Time Slots",
+      "item": [
+        {
+          "name": "List Time Slots",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/time-slots",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "time-slots"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Admin - Users",
-      "item": []
+      "name": "5. Bookings - Student",
+      "item": [
+        {
+          "name": "Create Booking (TC-BOOK-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\r",
+                  "pm.environment.set(\"booking_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"room_id\": \"{{room_id}}\",\r\n  \"date\": \"2026-07-01\",\r\n  \"slot_id\": 3,\r\n  \"purpose\": \"Postman test booking\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Slot Rejected (TC-BOOK-002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"room_id\": \"{{room_id}}\",\r\n  \"date\": \"2026-07-01\",\r\n  \"slot_id\": 3,\r\n  \"purpose\": \"Postman test booking\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Own Booking (TC-CANCEL-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/{{booking_id}}/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{booking_id}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Admin - Buildings",
-      "item": []
+      "name": "6. Bookings - PO",
+      "item": [
+        {
+          "name": "List Pending Bookings (TC-PO-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{po_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings?status=pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Booking (TC-PO-002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{po_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/{{booking_id}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{booking_id}}",
+                "approve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Booking (TC-PO-003)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{po_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/{{booking_id}}/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "{{booking_id}}",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
     },
     {
-      "name": "Admin - Rooms",
-      "item": []
+      "name": "7. Admin - Users",
+      "item": [
+        {
+          "name": "Create Student (TC-ADMIN-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"erp\": \"pm-test-99\",\r\n  \"name\": \"Postman Student\",\r\n  \"email\": \"pm99@test.com\",\r\n  \"password\": \"testpass\",\r\n  \"role\": \"student\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate ERP (TC-ADMIN-002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"erp\": \"pm-test-99\",\r\n  \"name\": \"Postman Student\",\r\n  \"email\": \"pm99@test.com\",\r\n  \"password\": \"testpass\",\r\n  \"role\": \"student\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Blocked Slots",
-      "item": []
+      "name": "8. Blocked Slots",
+      "item": [
+        {
+          "name": "Block Slots (TC-ADMIN-006)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\r",
+                  "pm.environment.set(\"blocked_slot_id\", pm.response.json()[0].id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"room_id\": \"{{room_id}}\",\r\n  \"date\": \"2026-07-10\",\r\n  \"slot_ids\": [1, 2],\r\n  \"reason\": \"Maintenance\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/blocked-slots",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "blocked-slots"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unblock Slot (TC-ADMIN-007)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/blocked-slots/{{blocked_slot_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "blocked-slots",
+                "{{blocked_slot_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Book a Blocked Slot (TC-BOOK-003)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 409 Conflict\", () => {\r",
+                  "    pm.response.to.have.status(409);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Error message mentions admin block\", () => {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.message).to.include(\"blocked by admin\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"room_id\": \"{{room_id}}\",\r\n  \"date\": \"2026-07-10\",\r\n  \"slot_id\": 1,\r\n  \"purpose\": \"Attempting to book a blocked slot\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
   "event": [
     {
       "listen": "prerequest",
@@ -86,16 +1140,6 @@
           ""
         ]
       }
-    }
-  ],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": ""
-    },
-    {
-      "key": "token",
-      "value": ""
     }
   ]
 }
