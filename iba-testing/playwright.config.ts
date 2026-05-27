@@ -4,7 +4,8 @@ export default defineConfig({
     globalSetup: "./e2e/global-setup.ts",
     testDir: "./e2e",
     fullyParallel: false,
-    retries: 1,
+    workers: 1, // one at a time
+    retries: 0,  // multiple retries will fail since DB is not reset between retries
     timeout: 30_000,
     reporter: [["list"], ["html", { outputFolder: "./reports/playwright", open: "never" }]],
     use: {
