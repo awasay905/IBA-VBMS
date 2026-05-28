@@ -19,6 +19,7 @@ export default function PODashboard({ user }) {
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
+        setBookings([]);
         loadBookings();
     }, [filterStatus]);
 
@@ -67,7 +68,7 @@ export default function PODashboard({ user }) {
                 <h2 className="text-2xl font-bold text-slate-800">Booking Requests Management</h2>
 
                 <div className="flex bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
-                    {["pending", "approved", "rejected", ""].map((status) => (
+                    {["pending", "approved", "rejected", "cancelled", ""].map((status) => (
                         <button
                             key={status}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${

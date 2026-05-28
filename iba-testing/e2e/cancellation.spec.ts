@@ -148,8 +148,14 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
             }
             await expect(successAlert).toBeVisible({ timeout: 10000 });
         }).toPass({ timeout: 20000 });
-        await page.getByRole("button", { name: "Rejected" }).click();
-        await expect(page.locator("tr", { hasText: "PO Kill Test" })).toBeVisible();
+
+        await expect(approvedRow).toBeHidden();
+
+        // Move to Cancelled Tab
+        await page.getByRole("button", { name: "Cancelled" }).click();
+        const cancelledRow = page.locator("tr", { hasText: "PO Kill Test" });
+        await expect(cancelledRow).toBeVisible();
+        await expect(cancelledRow.locator(".badge")).toHaveText(/cancelled/i);
     });
 
     test("TC-CANCEL-003/004 — Boundary: past/future logic check", async ({ page }) => {
