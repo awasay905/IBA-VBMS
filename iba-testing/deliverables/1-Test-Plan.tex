@@ -1,0 +1,713 @@
+\documentclass[12pt, a4paper]{article}
+
+% ─── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm, headheight=15pt]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{makecell}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{mdframed}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage[T1]{fontenc}
+
+% ─── Colours ───────────────────────────────────────────────────────────────────
+\definecolor{NavyBlue}{HTML}{1A2A4A}
+\definecolor{TealGreen}{HTML}{0D9488}
+\definecolor{LightTeal}{HTML}{CCFBF1}
+\definecolor{SlateGray}{HTML}{64748B}
+\definecolor{LightGray}{HTML}{F1F5F9}
+\definecolor{DarkText}{HTML}{1E293B}
+\definecolor{DangerRed}{HTML}{DC2626}
+\definecolor{WarningAmber}{HTML}{D97706}
+\definecolor{SuccessGreen}{HTML}{16A34A}
+\definecolor{HeaderRow}{HTML}{1A2A4A}
+\definecolor{AltRow}{HTML}{F8FAFC}
+
+% ─── Hyperref ──────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=TealGreen,
+  urlcolor=TealGreen,
+  citecolor=TealGreen,
+  pdftitle={Test Plan - IBA Campus Facility Booking System},
+  pdfauthor={Testing Team},
+}
+
+% ─── Section formatting ────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\color{NavyBlue}\Large\bfseries}
+  {\thesection}{1em}{}
+  [\color{TealGreen}\titlerule]
+
+\titleformat{\subsection}
+  {\color{NavyBlue}\large\bfseries}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\color{DarkText}\normalsize\bfseries}
+  {\thesubsubsection}{1em}{}
+
+\titlespacing*{\section}{0pt}{1.5ex plus 0.5ex}{0.8ex}
+\titlespacing*{\subsection}{0pt}{1.2ex plus 0.3ex}{0.5ex}
+
+% ─── Header / Footer ───────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+
+\fancyfoot[C]{\thepage}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% �� THIS IS THE IMPORTANT PART
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+% ─── Table helpers ─────────────────────────────────────────────────────────────
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\newcommand{\hdrrow}{\rowcolor{HeaderRow}}
+\newcommand{\altrow}{\rowcolor{AltRow}}
+
+\newcommand{\highsev}{\cellcolor{DangerRed!20}\textcolor{DangerRed}{\textbf{High}}}
+\newcommand{\medsev}{\cellcolor{WarningAmber!20}\textcolor{WarningAmber}{\textbf{Medium}}}
+\newcommand{\lowsev}{\cellcolor{SuccessGreen!20}\textcolor{SuccessGreen}{\textbf{Low}}}
+\newcommand{\inscope}{\textcolor{SuccessGreen}{\textbf{In Scope}}}
+\newcommand{\outscope}{\textcolor{DangerRed}{\textbf{Out of Scope}}}
+
+\newcommand{\priHigh}{\cellcolor{DangerRed!20}\textcolor{DangerRed}{\textbf{High}}}
+\newcommand{\priMed}{\cellcolor{WarningAmber!20}\textcolor{WarningAmber}{\textbf{Medium}}}
+\newcommand{\priLow}{\cellcolor{SuccessGreen!20}\textcolor{SuccessGreen}{\textbf{Low}}}
+
+% ─── Callout boxes ─────────────────────────────────────────────────────────────
+\newmdenv[
+  linecolor=TealGreen, linewidth=1.5pt,
+  backgroundcolor=LightTeal,
+  innerleftmargin=10pt, innerrightmargin=10pt,
+  innertopmargin=8pt, innerbottommargin=8pt,
+  skipabove=10pt, skipbelow=6pt
+]{infobox}
+
+\newmdenv[
+  linecolor=NavyBlue, linewidth=1pt,
+  backgroundcolor=LightGray,
+  innerleftmargin=10pt, innerrightmargin=10pt,
+  innertopmargin=8pt, innerbottommargin=8pt,
+  skipabove=8pt, skipbelow=6pt
+]{greybox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\input{titlepage}
+
+% ─── TABLE OF CONTENTS ────────────────────────────────────────────────────────
+\tableofcontents
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Introduction}
+
+\subsection{Purpose}
+
+This Test Plan defines the overall testing strategy, scope, objectives, resources, schedule, and test cases for the IBA Campus Facility Booking System. The document is the primary reference for all testing activities carried out by the test team as part of the Software Testing course project.
+
+\subsection{Background}
+
+The Institute of Business Administration (IBA) currently manages campus facility bookings(CFBS) through informal, manual methods including emails, physical registers, and verbal coordination. This leads to double-bookings, scheduling conflicts, and a lack of real-time visibility across the campus.
+
+The platform addresses these issues by providing a centralised, web-based platform that supports three user roles: \textbf{Students}, \textbf{Program Office (PO)} staff, and \textbf{Administrators}. Students can request room bookings, the Program Office approves or rejects those requests, and Administrators manage the overall system configuration.
+
+\subsection{Scope}
+
+\textbf{In scope:}
+\begin{itemize}[noitemsep]
+  \item All nine feature areas from the SRS: Authentication, Room Booking, Booking Approval/Rejection, User Management (Admin), Room Management, Building Management, Booking Cancellation, Slot Blocking, and Real-time Availability
+  \item Unit testing of individual backend controllers and service functions
+  \item API-level integration testing of all REST endpoints
+  \item End-to-end UI workflow testing via automated browser scripts
+  \item Negative path testing, boundary value analysis, and equivalence partitioning
+  \item Concurrency and conflict-detection testing (double booking, simultaneous slot requests)
+  \item Role-based access control (RBAC) security testing
+  \item Performance and load testing using free tools
+  \item Data persistence and audit trail verification
+  \item Frontend UX correctness: slot availability visibility, booking status indicators
+\end{itemize}
+
+\textbf{Out of scope:}
+\begin{itemize}[noitemsep]
+  \item Penetration testing beyond role-based access checks
+  \item Production deployment and infrastructure testing
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Items}
+
+The item under test is described in the SRS. Key details are summarised below.
+
+\begin{greybox}
+\begin{itemize}[noitemsep]
+  \item \textbf{System Name:} IBA Campus Facility Booking System
+  \item \textbf{Version:} 1.0
+  \item \textbf{Platform:} Web Application (React 18 + Vite + NestJS + Supabase PostgreSQL)
+  \item \textbf{Frontend URL:} \texttt{http://localhost:5173}
+  \item \textbf{Backend URL:} \texttt{http://localhost:3000/api}
+  \item \textbf{Database:} Supabase PostgreSQL (dedicated test instance, separate from production)
+  \item \textbf{Browsers Under Test:} Google Chrome (latest), Mozilla Firefox (latest)
+  \item \textbf{Operating Systems:} Windows 10/11, CachyOS 6.19.12-1
+\end{itemize}
+\end{greybox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Scope of Testing}
+
+% \subsection{Features to be Tested}
+
+All features specified in the SRS are within scope. The table below lists each feature with its priority, scope status, and the test techniques that will be applied. Priorities reflect both business impact and frequency of use.
+
+\vspace{0.5em}
+\begin{longtable}{L{4.6cm} C{1.6cm} C{1.6cm} L{5.5cm}}
+\hdrrow
+\color{white}\textbf{Feature} & \color{white}\textbf{Priority} & \color{white}\textbf{Status} & \color{white}\textbf{Test Techniques} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Feature} & \color{white}\textbf{Priority} & \color{white}\textbf{Status} & \color{white}\textbf{Test Techniques} \\
+\endhead
+\midrule
+\altrow Authentication (Student \& PO Login) & High & \inscope & ECP, BVA, Error Guessing \\
+Request Room Booking (Student) & High & \inscope & Decision Table, Use Case \\
+\altrow Accept / Reject Room Booking (PO) & High & \inscope & Use Case, Decision Table, Error Guessing \\
+Add Student (Admin) & High & \inscope & ECP, BVA \\
+\altrow Add Program Office Member (Admin) & High & \inscope & ECP, BVA \\
+Cancel Booking (Student / PO / Admin) & Medium & \inscope & Use Case \\
+\altrow Add Room (Admin) & Medium & \inscope & ECP, Functional \\
+Add Building (Admin) & Medium & \inscope & ECP, Functional \\
+\altrow Disable Room (Admin) & Low & \inscope & State Transition, Functional \\
+\bottomrule
+\caption{Features to be Tested}
+\end{longtable}
+
+
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Objectives}
+
+The testing effort for CFBS aims to achieve the following objectives:
+
+\begin{enumerate}[leftmargin=1.5em]
+
+  \item \textbf{Verify Functional Correctness.}
+  Confirm that all nine system features behave in accordance with the requirements defined in the SRS.
+
+  \item \textbf{Ensure Booking Conflict Prevention.}
+  Verify that the system correctly rejects booking requests that conflict with an already-approved booking for the same room, date, and time period --- including double-booking, blocked slots, and simultaneous requests from multiple students for the same slot.
+
+  \item \textbf{Validate Role-Based Access Control.}
+  Ensure that Students, Program Office staff, and Administrators can only perform actions within their authorised scope. Unauthorised actions must be blocked with appropriate error messages.
+
+  \item \textbf{Confirm Booking Constraint Enforcement.}
+  Validate that time slot restrictions (9~AM to 6~PM only), current-year date restrictions, and room-disabled states are properly enforced.
+
+  \item \textbf{Confirm Frontend Availability Visibility.}
+  Verify that the frontend communicates slot availability clearly before a student submits a request, not only after a conflict error is returned.
+
+  \item \textbf{Validate PO Applicant Distinction.}
+  Verify that the Program Office can distinguish between a student and a faculty/teacher applicant from the booking request details.
+
+  \item \textbf{Validate Input Handling and Edge Cases.}
+  Confirm that edge cases --- invalid credentials, past dates, zero capacity, duplicate ERP/username --- are handled gracefully with clear, non-sensitive error messages.
+
+  \item \textbf{Assess User Notifications.}
+  Confirm that the booking approval and rejection notification mechanism correctly informs the student of the Program Office decision.
+
+\end{enumerate}
+
+\begin{infobox}
+\textbf{Success Criterion:} Testing is considered successful when all planned test cases have been executed, all Severity-1 (Critical) defects have been resolved and re-tested, and $\geq$90\% of Severity-2 (Major) defects are resolved prior to release.
+\end{infobox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Strategy and Approach}
+
+Testing for CFBS follows a risk-based, specification-driven strategy aligned with IEEE 829 and ISTQB principles. Higher-priority and higher-risk features authentication, room booking, and approval/rejection receive the most thorough coverage.
+
+\subsection{Test Techniques}
+
+Three families of test design techniques are applied:
+
+\begin{itemize}
+
+  \item \textbf{Specification-Based }
+
+  \item \textbf{Structure-Based} 
+
+  \item \textbf{Experience-Based} 
+\end{itemize}
+
+\subsection{Test Levels}
+
+\begin{tabularx}{\linewidth}{X X}
+\hdrrow
+\color{white}\textbf{Level} & \color{white}\textbf{Scope} \\
+\midrule
+\altrow Unit Testing & Individual functions and components \\
+Integration Testing & API endpoints, database interactions \\
+\altrow System Testing & End-to-end functional scenarios \\
+User Acceptance Testing & Real-user validation of all workflows \\
+\end{tabularx}
+
+\subsection{Test Types}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Functional Testing} --- primary type, applied to all in-scope features
+  \item \textbf{Regression Testing} --- re-executed after every defect fix
+  \item \textbf{Negative Testing} --- invalid inputs, unauthorised access attempts
+  \item \textbf{Concurrency Testing} --- simultaneous booking requests for the same slot
+  \item \textbf{Performance Testing} --- API response times under realistic data loads
+  \item \textbf{Usability Testing} --- informal assessment during UAT sessions
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Risk Analysis}
+
+\subsection{Known and Predictable Risk Categories}
+
+The following table applies known and predictable risk categories directly to the CFBS project. Each category is assessed for its specific impact, severity, and mitigation strategy.
+
+Note: the severity rated below is relative to the project.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.6cm} L{3.4cm} C{1.5cm} L{6cm}}
+\hdrrow
+\color{white}\textbf{Risk Category} & \color{white}\textbf{Impact on CFBS} & \color{white}\textbf{Severity} & \color{white}\textbf{Mitigation Strategy} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Risk Category} & \color{white}\textbf{Impact on CFBS} & \color{white}\textbf{Severity} & \color{white}\textbf{Mitigation Strategy} \\
+\endhead
+\midrule
+\textbf{Business Impact} & Academic scheduling at IBA depends on correct bookings; errors affect all campus users & \highsev & Obtain stakeholder sign-off on scope; provide regular status reports \\[5pt]
+\textbf{Process Definition} & No formal booking process existed before this system; process gaps may surface during testing & \highsev & Strictly follow the test process defined in this plan; hold a process review before execution begins \\[5pt]
+\altrow \textbf{Development Environment} & The local development environment (PostgreSQL version, OS) may differ from the production setup & \medsev & Perform environment parity checks before testing; use consistent Docker-based configuration \\[5pt]
+\textbf{Technology to be Built} & The React + NestJS + Supabase stack is relatively new to the project team & \medsev & Conduct technology spike sessions; pair QA engineers with developers during integration testing \\[5pt]
+\bottomrule
+\caption{}
+\end{longtable}
+
+\subsection{Product Risks vs.\ Project Risks}
+
+Beyond the category-level analysis, specific risks are identified at two levels:
+
+\begin{tabularx}{\linewidth}{L{6.5cm} L{7cm}}
+\hdrrow
+\color{white}\textbf{Product Risk} & \color{white}\textbf{Project Risk} \\
+\midrule
+\altrow Double-booking defect allowing conflicting reservations & Test environment unavailable during scheduled execution \\
+\altrow Booking time restrictions (9~AM--6~PM) not enforced & Scope changes to the SRS discovered after testing has begun \\
+Cancelled bookings not correctly freeing room slots & Build delivered late, compressing the available test window \\
+\altrow Concurrent booking requests bypassing conflict detection & Frontend not reflecting real-time slot availability \\
+\end{tabularx}
+
+
+\newpage
+\section{Test Schedule}
+
+The following six-week schedule covers the full testing lifecycle from planning through closure.
+
+\vspace{0.5em}
+\begin{tabularx}{\linewidth}{C{1.2cm} L{3.5cm} C{2.2cm} L{6.5cm}}
+\hdrrow
+\color{white}\textbf{Phase} & \color{white}\textbf{Activity} & \color{white}\textbf{Duration} & \color{white}\textbf{Key Tasks} \\
+\midrule
+\altrow 1 & Test Planning & Week 1 & Review SRS; identify test conditions; finalise this test plan; define entry and exit criteria \\
+2 & Test Design & Week 2 & Design test cases using ECP, BVA, Decision Tables, State Transition, and Use Case techniques \\
+\altrow 3 & Environment Setup & Week 2--3 & Configure test database; seed test data; set up Selenium and Postman collections \\
+4 & Test Execution & Week 3--4 & Execute all planned test cases across all modules; log all defects \\
+\altrow 5 & Defect Fix \& Regression & Week 4--5 & Developer fixes defects; QA re-runs regression suite; verify all resolutions \\
+6 & UAT \& Closure & Week 5--6 & User acceptance testing with representative users; obtain stakeholder sign-off; archive artefacts \\
+\bottomrule
+\end{tabularx}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Estimation}
+\subsection{Phase 1 --- Test Planning (Week 1)}
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Review SRS and identify all testable features & 6 \\
+Define entry and exit criteria & 3 \\
+\altrow Identify and document risk categories & 5 \\
+Draft and finalise Master Test Plan document & 13 \\
+\altrow Define defect severity classification scheme & 1 \\
+Peer review of test plan & 2 \\
+\bottomrule
+\caption{Phase 1 --- Test Planning Work Packages}
+\end{longtable}
+
+\subsection{Phase 2 --- Test Design (Week 2)}
+
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Design auth test cases & 5 \\
+Design booking request test cases & 8 \\
+\altrow Design PO approval/rejection test cases (Use Case, Decision Table) & 5 \\
+Design cancellation test cases (State Transition, BVA) & 3 \\
+\altrow Design admin management test cases (ECP, BVA) & 3 \\
+Design performance and data integrity test cases & 3 \\
+\altrow Document all test cases & 5 \\
+\bottomrule
+\caption{Phase 2 --- Test Design Work Packages}
+\end{longtable}
+
+\subsection{Phase 3 --- Environment Setup (Weeks 2--3)}
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Configure Supabase dedicated test instance and isolate from production & 5 \\
+Seed test database: student accounts, PO accounts, rooms, buildings & 5 \\
+\altrow Set up NestJS backend in test environment and verify all API routes  & 3 \\
+Configure and verify React/Vite frontend against test backend & 3 \\
+\altrow Set up Postman collections for all NestJS REST endpoints & 5 \\
+\altrow Smoke-test the full environment (login, booking, PO flow) end-to-end & 3 \\
+\bottomrule
+\caption{Phase 3 --- Environment Setup Work Packages}
+\end{longtable}
+
+\subsection{Phase 4 --- Test Execution (Weeks 3--4)}
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Execute authentication test cases  & 8 \\
+Execute Execute room booking test cases & 8 \\
+Execute PO related test cases (PO approval, rejection, conflict resolution) & 5 \\
+\altrow Execute cancellation test cases & 5 \\
+Execute Admin test cases(admin user, room, and building management) & 5 \\
+Log all defects with severity, steps to reproduce, and evidence & 3 \\
+\bottomrule
+\caption{Phase 4 --- Test Execution Work Packages}
+\end{longtable}
+
+\subsection{Phase 5 --- Defect Fix \& Regression (Weeks 4--5)}
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Prioritise open defects with developer & 3 \\
+Re-test fixed Severity-1 and Severity-2 defects & 8 \\
+\altrow Execute full regression suite after each fix build & 8 \\
+Update defect status and reconfirm closure & 2 \\
+\bottomrule
+\caption{Phase 5 --- Defect Fix \& Regression Work Packages}
+\end{longtable}
+
+\subsection{Phase 6 --- UAT \& Closure (Weeks 5--6)}
+
+\begin{longtable}{L{9.5cm} C{3cm}}
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{Work Package} & \color{white}\textbf{Story Points} \\
+\endhead
+\midrule
+\altrow Prepare UAT scripts and test data for representative users & 5 \\
+Facilitate UAT sessions with student, PO, and admin participants & 8 \\
+\altrow Record UAT observations and obtain stakeholder sign-off & 3 \\
+Compile Test Execution Report (pass/fail metrics per module) & 3 \\
+\altrow Write final Test Summary Report (coverage, defect metrics, release recommendation) & 5 \\
+Archive all test artefacts (TestRail exports, JIRA snapshots, Postman collections) & 2 \\
+\bottomrule
+\caption{Phase 6 --- UAT \& Closure Work Packages}
+\end{longtable}
+ 
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Entry and Exit Criteria}
+
+\subsection{Entry Criteria}
+
+Testing of each module may begin only when all of the following conditions are satisfied:
+
+\begin{itemize}
+  \item The SRS has been reviewed by the team
+  \item The feature under test is code-complete and deployed to the test environment
+  \item Test data (user accounts, rooms, buildings) has been seeded in the test database
+  \item The test environment (frontend, backend, database) has been verified as operational
+  \item All Severity-1 (Critical) defects from the preceding test cycle have been resolved
+\end{itemize}
+
+\subsection{Exit Criteria}
+
+Testing may be formally concluded when:
+
+\begin{itemize}
+  \item All planned test cases have been executed
+  \item All Severity-1 (Critical) defects have been fixed, re-tested, and closed
+  \item $\geq 90\%$ of Severity-2 (Major) defects have been resolved
+  \item Test coverage is $\geq 95\%$ for all in-scope features
+  \item UAT sign-off has been received from the project stakeholder
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Resources, Roles and Responsibilities}
+
+\subsection{Team Structure}
+\begin{tabularx}{\linewidth}{L{3.5cm} C{1.5cm} L{8.5cm}}
+\hdrrow
+\color{white}\textbf{Tester} & \color{white}\textbf{ERP} & \color{white}\textbf{Primary Responsibilities} \\
+\midrule
+\altrow Syed Muhammad Deebaj Haider Kazmi & 26012 & Test Lead  coordinate execution, maintain traceability matrix, final report compilation; also owns data retention and audit test cases \\
+Saad Imam & 27079 & Unit testing and Authentication / User Management test cases  \\
+\altrow Imad Raza & 26953 & Booking lifecycle test cases , concurrency/conflict tests, PO approval flow  \\
+Abdul Wasay Imran & 27126 & Room \& Building management, E2E frontend tests, performance/load testing, security test cases \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Test Environment and Tools}
+
+\begin{tabularx}{\linewidth}{L{3.5cm} L{10cm}}
+\hdrrow
+\color{white}\textbf{Category} & \color{white}\textbf{Details} \\
+\midrule
+\altrow Operating Systems & Windows 10/11, CachyOS 6.19.12-1 \\
+Browsers & Google Chrome (latest stable), Mozilla Firefox (latest stable) \\
+\altrow Frontend & React 18 + Vite \\
+Backend & NestJS (Node.js) \\
+\altrow Database & Supabase PostgreSQL (test instance, isolated from production) \\
+Test Automation & Selenium WebDriver 4 \\
+\altrow API Testing & Postman v10 \\
+Test Management & TestRail \\
+\altrow Defect Tracking & JIRA \\
+\end{tabularx}
+
+\subsection{Defect Severity Classification}
+
+\begin{tabularx}{\linewidth}{C{1.5cm} L{3.5cm} L{8.5cm}}
+\hdrrow
+\color{white}\textbf{Level} & \color{white}\textbf{Label} & \color{white}\textbf{Definition} \\
+\midrule
+\altrow S1 & \textcolor{DangerRed}{\textbf{Critical}} & System crash, data loss, complete feature failure, or security breach \\
+S2 & \textcolor{WarningAmber}{\textbf{Major}} & Core functionality broken; no acceptable workaround \\
+\altrow S3 & \textcolor{SuccessGreen}{\textbf{Minor}} & Feature works but with noticeable issues; simple workaround exists \\
+S4 & \textbf{Trivial} & Cosmetic issues, typos, or minor UI inconsistencies \\
+\end{tabularx}
+
+% ══════════════════════════════════════════════════════════════════════════════
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Deliverables}
+
+The following artefacts will be produced as outputs of the testing effort:
+
+\begin{enumerate}
+  \item \textbf{Test Plan Document} (this document) 
+  \item \textbf{Test Cases}: covering all in-scope features with preconditions, steps, expected results, and actual results
+  \item \textbf{Test Data Set}: seed scripts containing test users, rooms, buildings, and booking records
+  \item \textbf{Defect Reports}: all defects logged with severity, priority, steps to reproduce, and fix status
+  \item \textbf{Test Execution Report}: pass/fail metrics per module, produced at the end of each execution cycle
+  \item \textbf{Test Summary Report}: final report covering total tests run, defect metrics, coverage achieved, deviations from plan, and release recommendation
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\newpage
+\section{Test Cases}
+
+This section outlines the high-level test cases designed to validate the functionality, reliability, and security of the IBA Campus Facility Booking System. Each test case is mapped to a feature in the SRS and is assigned a priority to guide the test execution schedule. These test cases will be further detailed in specific Test Case Specification documents with step-by-step procedures and explicit expected results.
+
+% ─── 7.1 Authentication ───────────────────────────────────────────────────────
+\subsection{Authentication \& Authorisation }
+
+This set of tests ensures that the login functionality is secure and that user roles are correctly enforced across the application.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+\altrow TC-AUTH-001 & A registered student logs in with a valid ERP and password and is successfully redirected to the student dashboard. & Functional & \priHigh \\
+TC-AUTH-002 & A registered Program Office (PO) member logs in with a valid username and password and is successfully redirected to the PO dashboard. & Functional & \priHigh \\
+\altrow TC-AUTH-003 & A user attempts to log in with an invalid ERP/username or an incorrect password. The system displays a clear, non-specific error message (e.g., ``Invalid credentials'') and does not grant access. & Negative & \priHigh \\
+TC-AUTH-004 & A non-authenticated user attempts to directly access a protected URL (e.g., /dashboard). The system blocks access and redirects them to the login page. & Security & \priHigh \\
+\altrow TC-AUTH-005 & A logged-in student attempts to access a PO-only URL (e.g., /admin/pending-requests). The system prevents access and shows an ``Unauthorized'' or similar error. & Security & \priHigh \\
+TC-AUTH-006 & A logged-in PO member attempts to access an Admin-only URL (e.g., /admin/add-user). The system prevents access. & Security & \priHigh \\
+\altrow TC-AUTH-007 & User logs out. Verify that the session/token is destroyed and they cannot use the browser's back button to view protected pages. & Security & \priMed \\
+\bottomrule
+\caption{Authentication \& Authorisation Test Cases}
+\end{longtable}
+
+% ─── 7.2 Room Booking Request ─────────────────────────────────────────────────
+\subsection{Room Booking Request }
+
+These tests focus on the core student workflow of finding and requesting a facility booking, including all business rule validations.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+\altrow TC-BOOK-001 & (Happy Path) Student successfully submits a booking request for an available room during valid hours (e.g., Wednesday at 2:00~PM) and receives a confirmation message. The request appears in their dashboard with ``Pending'' status. & Functional & \priHigh \\
+TC-BOOK-002 & Student attempts to request a time slot that is already booked by another user. The system displays an error message indicating the conflict and does not submit the request. & Functional & \priHigh \\
+\altrow TC-BOOK-003 & Student attempts to request a room that has been disabled by an Admin for the selected date. The system displays an error message indicating the room is unavailable/disabled. & Functional & \priHigh \\
+TC-BOOK-004 & (Boundary) Student attempts to book a time slot exactly at 9:00~AM. The request is accepted. & Boundary & \priMed \\
+\altrow TC-BOOK-005 & (Boundary) Student attempts to book a time slot ending exactly at 6:00~PM. The request is accepted. & Boundary & \priMed \\
+TC-BOOK-006 & (Boundary) Student attempts to book a time slot starting at 8:59~AM. The request is rejected. & Boundary & \priMed \\
+\altrow TC-BOOK-007 & (Boundary) Student attempts to book a time slot starting at 6:00~PM. The request is rejected. & Boundary & \priMed \\
+TC-BOOK-008 & Student attempts to submit a booking request without filling in the mandatory ``purpose'' field. The system shows a validation error and prevents submission. & Negative & \priMed \\
+\altrow TC-BOOK-009 & (Concurrency) Two different students attempt to submit a request for the exact same room and time slot simultaneously. The system correctly accepts the first request and rejects the second as a conflict. & Concurrency & \priHigh \\
+\bottomrule
+\caption{Room Booking Request Test Cases}
+\end{longtable}
+
+% ─── 7.3 Booking Management (PO) ─────────────────────────────────────────────
+\subsection{Booking Management --- Program Office }
+
+These tests validate the Program Office's ability to manage incoming requests efficiently and accurately.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+\altrow TC-PO-001 & PO member logs in and views a correctly populated list of all ``Pending'' booking requests on their dashboard. & Functional & \priHigh \\
+TC-PO-002 & PO approves a pending request. The booking status is updated to ``Approved,'' the room schedule is updated to show it as booked, and the student receives a notification. & Functional & \priHigh \\
+\altrow TC-PO-003 & PO rejects a pending request. The booking status is updated to ``Rejected,'' the time slot remains available for booking, and the student receives a notification. & Functional & \priHigh \\
+TC-PO-004 & (Conflict Resolution) Two students (A and B) have pending requests for the same time slot. The PO approves Student~A's request. Verify that Student~B's request is automatically rejected or flagged as a conflict, preventing a double booking. & Functional & \priHigh \\
+\bottomrule
+\caption{Booking Management (PO) Test Cases}
+\end{longtable}
+
+% ─── 7.4 Booking Cancellation ────────────────────────────────────────────────
+\subsection{Booking Cancellation}
+
+These tests ensure that bookings can be cancelled by authorised users according to the business rules.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+\altrow TC-CANCEL-001 & A student cancels their own pending booking. The request is removed from the PO's queue and the slot remains available. & Functional & \priMed \\
+TC-CANCEL-002 & A student cancels their own approved booking well before the start time. The booking status changes to ``Cancelled'' and the time slot becomes available again. & Functional & \priHigh \\
+\altrow TC-CANCEL-003 & (Boundary) A user attempts to cancel an approved booking 1~minute before its scheduled start time. The cancellation is successful. & Boundary & \priMed \\
+TC-CANCEL-004 & (Boundary) A user attempts to cancel an approved booking 1~minute after its scheduled start time. The system prevents the cancellation. & Boundary & \priHigh \\
+\altrow TC-CANCEL-005 & A PO member successfully cancels a student's approved booking. The slot becomes available and the student is notified. & Functional & \priMed \\
+\bottomrule
+\caption{Booking Cancellation Test Cases}
+\end{longtable}
+
+% ─── 7.5 Admin System Management ────────────────────────────────────────────
+\subsection{Admin System Management}
+
+These tests cover the administrative functions for managing system data such as users, rooms, and buildings.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+\altrow TC-ADMIN-001 & Admin successfully adds a new student account using a unique ERP. & Functional & \priHigh \\
+TC-ADMIN-002 & Admin attempts to add a new student with an ERP that already exists. The system shows a unique constraint error and does not create the account. & Negative & \priMed \\
+\altrow TC-ADMIN-003 & Admin successfully adds a new PO member account with a unique username. & Functional & \priHigh \\
+TC-ADMIN-004 & Admin successfully adds a new building with a unique name. & Functional & \priMed \\
+\altrow TC-ADMIN-005 & Admin successfully adds a new room, assigning it to an existing building. & Functional & \priMed \\
+TC-ADMIN-006 & Admin successfully disables an existing room for a specified period. Verify that this room does not appear as available for booking during that period. & Functional & \priHigh \\
+\altrow TC-ADMIN-007 & Admin re-enables a previously disabled room. Verify that the room becomes available for booking again. & Functional & \priMed \\
+\bottomrule
+\caption{Admin System Management Test Cases}
+\end{longtable}
+
+% ─── 7.6 Performance & Data Integrity ────────────────────────────────────────
+\subsection{Data Integrity}
+
+To ensure data is stored reliably.
+
+\vspace{0.5em}
+\begin{longtable}{L{2.4cm} L{7.5cm} C{2cm} C{1.6cm}}
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endfirsthead
+\hdrrow
+\color{white}\textbf{TC ID} & \color{white}\textbf{Description} & \color{white}\textbf{Type} & \color{white}\textbf{Priority} \\
+\endhead
+\midrule
+TC-DATA-001 & After a booking is created, approved, and cancelled, verify that an accurate audit trail of these status changes is maintained in the database for future reference. & Functional & \priMed \\
+\bottomrule
+\caption{Performance \& Data Integrity Test Cases}
+\end{longtable}
+
+\end{document}
