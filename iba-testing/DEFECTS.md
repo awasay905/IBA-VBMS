@@ -5,7 +5,7 @@
 | DEF-001 | TC-CANCEL-001, 002, 005 | S2 | Cancelled bookings are incorrectly marked as 'rejected' | Open |
 | DEF-002 | TC-BOOK-BUG, TC-CANCEL-BUG | S1 | Unconditional unique DB constraint prevents re-booking cancelled/rejected slots | Open |
 | DEF-003 | TC-BOOK-PAST | S2 | Missing validation allows users to book rooms for past dates | Open |
-
+|DEF-004	| TC-CANCEL-002	| S2	| Student dashboard does not show "Cancel" button for approved bookings |	Open |
 ---
 
 ## DEF-001 detail
@@ -66,4 +66,33 @@
   }
   ```
   There is no business logic in the `create` method nor a class-validator decorator (such as a custom `@IsFutureDate()` or `class-validator` equivalents) to prevent historical dates.
+- **Status:** Open
+
+--
+
+## DEF-004 detail
+
+- **TC:** TC-CANCEL-002
+- **Severity:** S2 (Major)
+- **Title:** Student dashboard does not show "Cancel" button for approved bookings
+- **Steps to reproduce:**
+  1. Authenticate as a student.
+  2. Create a room booking and wait for a Program Office member to "Approve" it.
+  3. Navigate to the Student Dashboard.
+  4. Locate the card corresponding to the "Approved" booking.
+  5. Observe the available action buttons.
+- **Expected:** As per SRS 2.9, users should be able to cancel a booking before the start time. The "Cancel" button should be visible on the booking card regardless of whether the status is "Pending" or "Approved".
+- **Actual:** The "Cancel" button is missing. Action buttons only appear for bookings with a "Pending" status.
+- **Root cause:** In `iba-booking-frontend\src\pages\StudentDashboard.jsx`, the conditional rendering for the cancellation action is strictly limited to the "pending" string:
+  ```javascript
+  {/* Lines 253-263 in StudentDashboard.jsx */}
+  {booking.status === "pending" && (
+      <div className="...">
+          <button onClick={() => handleCancel(booking.id)} ...>
+              Cancel
+          </button>
+      </div>
+  )}
+  ```
+  The logic fails to include the `approved` status in the allowed state for the UI button.
 - **Status:** Open
