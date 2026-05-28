@@ -1,14 +1,38 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { IsUUID, IsInt, IsString, IsNotEmpty, IsDateString, Min, Max } from 'class-validator';
+import { IsUUID, IsInt, IsString, IsNotEmpty, IsDateString, Min, Max, ValidationArguments, ValidationOptions, registerDecorator } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateBookingDto {
   @IsUUID()                    room_id: string;
-  @IsDateString()              date: string;
+  @IsDateString() @IsNotPastDate()          date: string;
   @Type(()=>Number) @IsInt() @Min(1) @Max(7)  slot_id: number;
   @IsString() @IsNotEmpty()    purpose: string;
 }
+
+export function IsNotPastDate(validationOptions?: ValidationOptions) {
+  return function (object: Object, propertyName: string) {
+    registerDecorator({
+      name: 'isNotPastDate',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const bookingDate = new Date(value);
+          const today = new Date();
+          // Reset time to start of day for accurate date-only comparison
+          today.setHours(0, 0, 0, 0); 
+          return bookingDate >= today;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return 'Booking date cannot be in the past';
+        }
+      },
+    });
+  };
+}
+
 
 const SELECT = `
   id, date, slot_id, purpose, status, reviewed_by, created_at, updated_at,
