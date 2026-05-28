@@ -103,6 +103,39 @@ describe("Student Room Booking Creation Feature", () => {
             .expect(409);
     });
 
+    it("TC-BOOK-004 to 007: Boundary test — should reject out-of-bounds slot_ids with 400 Bad Request", async () => {
+        const bookingDate = getFutureDate(14);
+
+        // 1. Lower Boundary (slot_id: 0) - Maps to time before 8:30 AM
+        const resLower = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${studentToken}`)
+            .send({
+                room_id: roomAId,
+                date: bookingDate,
+                slot_id: 0,
+                purpose: "Early Boundary Test (TC-BOOK-006)",
+            });
+
+        // 2. Upper Boundary (slot_id: 8) - Maps to time after 6:45 PM
+        const resUpper = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${studentToken}`)
+            .send({
+                room_id: roomAId,
+                date: bookingDate,
+                slot_id: 8,
+                purpose: "Late Boundary Test (TC-BOOK-007)",
+            });
+
+        // ASSERTIONS:
+        // Proper DTO validation should catch this and return a 400 Bad Request.
+        // NOTE: If this fails with a 500 Internal Server Error, it proves DEF-010
+        // (Missing @Min(1) and @Max(7) in CreateBookingDto).
+        expect(resLower.status).toBe(400);
+        expect(resUpper.status).toBe(400);
+    });
+
     it("TC-BOOK-008: missing purpose field rejected with validation error", async () => {
         const bookingDate = getFutureDate(6);
 

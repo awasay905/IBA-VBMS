@@ -72,6 +72,43 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
         // NOTE: This will fail if DEF-001 is not fixed (showing 'rejected' instead of 'cancelled')
         await expect(bookingCard.locator(".badge")).toHaveText(/cancelled/i);
     });
+
+    test("TC-CANCEL-002 — student cancels own approved booking (DEF-004)", async ({ page }) => {
+        // We explicitly tell Playwright this will fail due to a known UI bug.
+        // Once the developer fixes the UI, this test will trigger a "Expected to fail, but passed" warning,
+        // prompting you to remove `test.fail()`.
+        test.fail(true, "DEF-004: Student dashboard does not show 'Cancel' button for approved bookings");
+
+        const purpose = "Approved Cancellation Test";
+        await createStudentBooking(page, purpose);
+
+        // 1. Login as PO to Approve it
+        await page.getByRole("button", { name: "Logout" }).click();
+        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
+        await page.getByLabel("Password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In" }).click();
+
+        const pendingRow = page.locator("tr", { hasText: purpose });
+        await pendingRow.getByRole("button", { name: "Approve" }).click();
+        await expect(page.getByText("Booking approved successfully!")).toBeVisible();
+        await page.getByRole("button", { name: "Logout" }).click();
+
+        // 2. Login back as Student
+        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
+        await page.getByLabel("Password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In" }).click();
+
+        // 3. Locate the card and attempt to cancel
+        const bookingCard = page.locator(".card", { hasText: purpose });
+        page.on("dialog", (dialog) => dialog.accept());
+
+        // This action will Timeout/Fail because the button is missing from the DOM (DEF-004)
+        await bookingCard.getByRole("button", { name: "Cancel" }).click();
+
+        // 4. Verify the success alert (Won't be reached until bug is fixed)
+        await expect(page.getByText("Booking cancelled successfully")).toBeVisible();
+    });
+
     test("TC-CANCEL-005 — PO cancels an approved booking", async ({ page }) => {
         // 1. Create a booking as a student
         await createStudentBooking(page, "PO Kill Test");
