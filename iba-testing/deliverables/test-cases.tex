@@ -1,0 +1,319 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}       % For professional table rules
+\usepackage{tabularx}       % For autowrapping tables (prevents spilloff)
+\usepackage{longtable}      % For multi-page tables
+\usepackage{listings}       % For code block formatting
+\usepackage{xcolor}         % For visual accents
+\usepackage{enumitem}       % To control spacing in lists
+\usepackage{needspace}      % To prevent orphan headers
+\usepackage{hyperref}       % For cross-references
+\usepackage{helvet}         % Standard clean sans-serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- Color Palette ---
+\definecolor{primaryblue}{RGB}{31, 78, 121}
+\definecolor{accentgray}{RGB}{242, 242, 242}
+\definecolor{darkgray}{RGB}{80, 80, 80}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codepurple}{rgb}{0.5,0,0.5}
+
+% --- Listings (Code) Configuration ---
+\lstset{
+    backgroundcolor=\color{accentgray},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{primaryblue}\bfseries,
+    numberstyle=\tiny\color{darkgray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{lightgray}
+}
+
+% --- Custom Command for IEEE 829 Test Case Blocks ---
+\newcommand{\ieeetestcase}[8]{%
+    \needspace{8\baselineskip}
+    \noindent\colorbox{primaryblue}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+        \color{white}\bfseries\large\strut #1: #2
+    }}
+    \nopagebreak\\
+    \noindent\begin{tabularx}{\textwidth}{@{}X X@{}}
+        \textbf{Test Level:} #3 & \textbf{Type:} #4 \\
+        \textbf{Traceability (SRS):} #5 & \textbf{Status:} #6 \\
+    \end{tabularx}
+    \nopagebreak\vspace{0.1cm}
+    \nopagebreak\hrule\vspace{0.2cm}
+    \noindent\textbf{Preconditions:} #7 \\
+    \noindent\textbf{Procedural Steps:}
+    \begin{enumerate}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+        #8
+    \end{enumerate}
+    \vspace{0.4cm}\hrule\vspace{0.4cm}
+}
+
+% --- Document Metadata ---
+\title{
+    \rule{\textwidth}{1.5pt} \\
+    \textbf{\Large IEEE 829 Test Case Specification} \\
+    \large IBA Campus Facility Booking System --- QA Artifact \\
+    \rule{\textwidth}{1.5pt}
+}
+\author{
+    \textbf{Prepared by:} \\
+    Abdul Wasay Imran (27126) \quad Saad Imam (27079) \\
+    Muhammad Imad Raza (26953) \quad Syed Muhammad Deebaj Haider Kazmi (26012)
+}
+\date{Version 1.0 --- \today}
+
+\begin{document}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Purpose}
+This document defines the formal Test Case Specification for the IBA Campus Facility Booking System (CFBS). It details the inputs, procedural execution steps, expected outcomes, and actual execution statuses observed during the automated and manual test runs.
+
+\subsection{Scope & Traceability}
+These test cases are designed to validate all functional requirements documented in the CFBS Software Requirements Specification (SRS). They span multiple test levels:
+\begin{itemize}[noitemsep]
+    \item \textbf{Unit Level (NestJS / Jest):} Validating individual services, helper utilities, and controllers in isolation.
+    \item \textbf{Integration Level (Supertest / Express):} Testing REST API endpoint routing, middleware authorization, and database persistence.
+    \item \textbf{E2E System Level (Playwright / Chromium \& Firefox):} Emulating complete user workflows in headless and headed browser contexts.
+\end{itemize}
+
+\subsection{Environmental & Procedural Requirements}
+To execute the test cases specified herein, the following sandbox parameters are strictly required:
+\begin{enumerate}[noitemsep]
+    \item A dedicated, isolated testing database seeded via \texttt{seedTestData.sql} before each test suite execution.
+    \item A local test server listening on port \texttt{3000} (Backend API) and a Vite development server on port \texttt{5173} (Frontend Client).
+    \item Automation frameworks configured using Node 18+, Jest v30, and Playwright v1.60.
+\end{enumerate}
+
+\newpage
+\section{Test Case Specifications}
+
+\subsection{Authentication & Authorization (TC-AUTH)}
+
+\ieeetestcase{TC-AUTH-001}{Valid Student Login Validation}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-3, REQ-4}{\textbf{PASS}}{Database is seeded with user \texttt{test-student} and password \texttt{testpass}.}{
+    \item Send a POST request to \texttt{/api/auth/login} with student credentials or enter them on the login page.
+    \item Verify that the response returns an \texttt{access\_token} and a payload containing the student's profile.
+    \item Confirm that the student is redirected to \texttt{/dashboard} and that the plain text password is not returned.
+}
+
+\ieeetestcase{TC-AUTH-002}{Valid Program Office Login Validation}{E2E \& Integration}{Positive / Functional}{REQ-2, REQ-3, REQ-4}{\textbf{PASS}}{Database is seeded with PO user \texttt{test-po} and password \texttt{testpass}.}{
+    \item Submit a POST request to \texttt{/api/auth/login} with PO credentials.
+    \item Assert that a valid JWT token is returned and that the role is identified as \texttt{programoffice}.
+    \item Verify that the user is redirected to the Program Office dashboard.
+}
+
+\ieeetestcase{TC-AUTH-003}{Invalid Credentials Handling}{E2E, Integration, Unit}{Negative / Security}{REQ-5}{\textbf{PASS}}{The auth database is active and populated.}{
+    \item Send a login request using an invalid ERP or password (e.g., username: \texttt{wrong-user}, password: \texttt{wrong-pass}).
+    \item Assert that the API rejects the request with a \texttt{401 Unauthorized} status.
+    \item Verify that the UI displays the error message: ``Invalid credentials''.
+}
+
+\ieeetestcase{TC-AUTH-004}{Protected Route Access Redirection}{Integration (RBAC)}{Security / Negative}{REQ-6}{\textbf{PASS}}{The user is unauthenticated (no session token stored).}{
+    \item Attempt to directly access a protected URL (e.g., \texttt{GET /api/bookings}).
+    \item Verify that the API rejects the request with a \texttt{401 Unauthorized} status.
+    \item Confirm that the UI redirects the unauthenticated user back to the login page.
+}
+
+\newpage
+\subsection{Room Booking Request (TC-BOOK)}
+
+\ieeetestcase{TC-BOOK-001}{Happy Path Booking Creation}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3, REQ-6}{\textbf{PASS} (Firefox Cleanup Warning)}{Database is seeded; user \texttt{test-student} is authenticated.}{
+    \item Select an active building (Test Building) and room (Test Room A) from the dropdown options.
+    \item Choose a date in the current year and select an available time slot (Slot 3: 11:30 AM).
+    \item Enter a valid booking purpose and submit the request.
+    \item Assert that the request is created with a status of \texttt{pending} and appears in the student's dashboard.
+}
+
+\ieeetestcase{TC-BOOK-002}{Overlapping Booking Prevention}{E2E \& Integration}{Negative / Constraint}{REQ-4, REQ-7}{\textbf{PASS}}{A pending booking exists for Room A on a specific date and time slot.}{
+    \item Authenticate as a student.
+    \item Attempt to submit a new booking request for the exact same room, date, and slot.
+    \item Verify that the system rejects the request with a \texttt{409 Conflict} status and does not submit it.
+}
+
+\ieeetestcase{TC-BOOK-003}{Blocked Slot Booking Prevention}{E2E \& Integration}{Negative / Constraint}{REQ-4, REQ-7}{\textbf{PASS}}{An Admin has blocked Slot 2 on the target date.}{
+    \item Authenticate as a student.
+    \item Attempt to book Slot 2 on the blocked date for the specified room.
+    \item Assert that the system rejects the request with a \texttt{409 Conflict} status, returning an error: ``This slot is blocked by admin''.
+}
+
+\ieeetestcase{TC-BOOK-004/5/6/7}{Booking Boundary Verification}{Integration}{Boundary}{REQ-3}{\textbf{FAIL} (DEF-010)}{The database is active; student is authenticated.}{
+    \item Send a POST request to \texttt{/api/bookings} with an invalid \texttt{slot\_id} (e.g., lower bound: \texttt{0}, upper bound: \texttt{8}).
+    \item Assert that the API rejects the request with a \texttt{400 Bad Request} validation error.
+    \item \textbf{Actual Result:} The system throws an unhandled database foreign key violation, returning a \texttt{500 Internal Server Error} instead.
+}
+
+\ieeetestcase{TC-BOOK-008}{Missing Purpose Field Validation}{E2E \& Integration}{Negative / Validation}{REQ-5}{\textbf{PASS}}{The student is logged in and preparing a booking form.}{
+    \item Select a building, room, date, and slot, but leave the booking ``purpose'' field empty.
+    \item Click ``Submit Booking Request.''
+    \item Verify that native HTML5 validations or custom UI alert boxes block the submission and highlight the missing field.
+}
+
+\ieeetestcase{TC-BOOK-009}{Simultaneous Booking Concurrency}{Integration}{Concurrency / Stress}{REQ-7}{\textbf{FAIL} (DEF-002)}{Two students are logged in simultaneously.}{
+    \item Fire two booking requests for the exact same room, date, and slot at the exact same millisecond.
+    \item Assert that one request succeeds (\texttt{201 Created}) while the other is gracefully rejected with a \texttt{409 Conflict}.
+    \item \textbf{Actual Result:} The database unique constraint throws an unhandled exception on the duplicate insert, returning a \texttt{500 Internal Server Error} instead of a \texttt{409}.
+}
+
+\newpage
+\subsection{Booking Management --- Program Office (TC-PO)}
+
+\ieeetestcase{TC-PO-001}{View Pending Requests Dashboard}{E2E \& Integration}{Positive / Functional}{REQ-1}{\textbf{PASS}}{A student has submitted a pending booking request.}{
+    \item Log in to the portal using Program Office credentials (\texttt{test-po}).
+    \item Access the pending requests tab.
+    \item Assert that the queue correctly displays the student's name, room, date, slot, and purpose.
+}
+
+\ieeetestcase{TC-PO-002}{Approve Pending Request}{E2E \& Integration}{Positive / Functional}{REQ-2, REQ-3, REQ-4}{\textbf{PASS}}{A pending request exists in the Program Office queue.}{
+    \item Log in as a PO member and select the target pending request.
+    \item Click ``Approve.''
+    \item Verify that the booking status is updated to \texttt{approved} and moves to the approved bookings tab.
+}
+
+\ieeetestcase{TC-PO-003}{Reject Pending Request}{E2E \& Integration}{Positive / Functional}{REQ-2, REQ-4}{\textbf{PASS}}{A pending request exists in the Program Office queue.}{
+    \item Log in as a PO member and select the target pending request.
+    \item Click ``Reject.''
+    \item Assert that the booking status changes to \texttt{rejected} and the time slot remains available for other users.
+}
+
+\ieeetestcase{TC-PO-004}{Auto-Rejection of Overlapping Bookings}{E2E \& Integration}{Functional / Logic}{REQ-5}{\textbf{FAIL} (DEF-002)}{Two pending booking requests exist for the same room and slot.}{
+    \item Log in as a PO member.
+    \item Approve the first student's pending request.
+    \item Verify that the second student's request is automatically updated to \texttt{rejected} or flagged as a conflict.
+    \item \textbf{Actual Result:} The test cannot proceed past the setup phase because the database unique constraint blocks the submission of the second overlapping request, preventing it from ever appearing in the PO's queue.
+}
+
+\newpage
+\subsection{Booking Cancellation (TC-CANCEL)}
+
+\ieeetestcase{TC-CANCEL-001}{Student Cancels Own Pending Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-001)}{A student has a booking request with a \texttt{pending} status.}{
+    \item Log in as the student who created the booking and locate it on the dashboard.
+    \item Click ``Cancel'' and accept the confirmation dialog.
+    \item Assert that the booking status changes to \texttt{cancelled}.
+    \item \textbf{Actual Result:} The booking status is incorrectly updated to \texttt{rejected} in the database.
+}
+
+\ieeetestcase{TC-CANCEL-002}{Student Cancels Own Approved Booking}{E2E}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-004)}{A student has a booking request with an \texttt{approved} status.}{
+    \item Log in as the student who created the booking and view the dashboard.
+    \item Locate the card for the approved booking.
+    \item Click ``Cancel'' and accept the confirmation dialog.
+    \item \textbf{Actual Result:} The ``Cancel'' button is completely missing from the UI card on the student dashboard for approved bookings.
+}
+
+\ieeetestcase{TC-CANCEL-005}{PO Cancels Approved Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-001)}{An approved booking exists in the system.}{
+    \item Log in as a PO member and access the approved bookings tab.
+    \item Locate the target booking, click ``Cancel,'' and accept the confirmation dialog.
+    \item Assert that the booking status changes to \texttt{cancelled}.
+    \item \textbf{Actual Result:} While the UI displays a cancellation success alert, the database incorrectly records the final status as \texttt{rejected}.
+}
+
+\newpage
+\subsection{Admin System Management & Data Integrity (TC-ADMIN / TC-DATA)}
+
+\ieeetestcase{TC-ADMIN-001}{Create Student Account}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-3}{\textbf{PASS}}{The Admin is logged in.}{
+    \item Access the student management tab.
+    \item Enter a unique ERP, name, email, and password, and submit the form.
+    \item Verify that the student record is created in the database and visible in the UI.
+}
+
+\ieeetestcase{TC-ADMIN-002}{Create Duplicate Student Account}{E2E \& Integration}{Negative / Functional}{REQ-2, REQ-4}{\textbf{PASS}}{A student record with ERP \texttt{12345} already exists.}{
+    \item Attempt to create a new student account using the existing ERP \texttt{12345}.
+    \item Assert that the system rejects the creation with a \texttt{409 Conflict} status and displays a unique constraint error.
+}
+
+\ieeetestcase{TC-ADMIN-006/007}{Block & Unblock Slot Lifecycle}{Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{PASS}}{The Admin is logged in.}{
+    \item Send a POST request to \texttt{/api/blocked-slots} to block Slot 1 on a specific room and date.
+    \item Verify that the block is recorded in the database.
+    \item Send a DELETE request to \texttt{/api/blocked-slots/:id} to unblock the slot.
+    \item Assert that the system returns a \texttt{200 OK} status with the message: ``Slot unblocked''.
+}
+
+\ieeetestcase{TC-DATA-001}{Audit Trail Verification}{Integration}{Functional / Security}{REQ-8}{\textbf{FAIL} (DEF-015)}{A booking has been approved by the Program Office.}{
+    \item Retrieve the approved booking record by sending a GET request to \texttt{/api/bookings/:id}.
+    \item Assert that the returned payload contains the \texttt{reviewed\_by} field containing the PO member's UUID.
+    \item \textbf{Actual Result:} The \texttt{reviewed\_by} field is explicitly omitted from the returned database payload, breaking the audit trail.
+}
+
+\newpage
+\section{Test Run Execution Summary}
+
+\subsection{Execution Dashboard}
+The following table summarizes the execution results of the automated Jest and Playwright test runs, mapping failures directly to the logged defects.
+
+
+
+\begin{center}
+\begin{longtable}{@{}lp{3.6cm}ccp{4.5cm}p{2cm}@{}}
+\caption{Overall Test Case Execution Log} \label{tab:exec_log} \\
+\toprule
+\textbf{Test ID} & \textbf{Suite File} & \textbf{Level} & \textbf{Executed} & \textbf{Observed Behavior} & \textbf{Status} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Test ID} & \textbf{Suite File} & \textbf{Level} & \textbf{Executed} & \textbf{Observed Behavior} & \textbf{Status} \\ \midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+TC-AUTH-001 & \texttt{auth} & E2E & Yes & User logged in, token returned & \textbf{PASS} \\
+TC-AUTH-002 & \texttt{auth} & E2E & Yes & PO logged in, dashboard accessible & \textbf{PASS} \\
+TC-AUTH-003 & \texttt{auth} & E2E & Yes & Handled bad credentials gracefully & \textbf{PASS} \\
+TC-AUTH-004 & \texttt{auth.rbac} & Int & Yes & Unauthenticated request blocked & \textbf{PASS} \\
+TC-AUTH-007 & \texttt{auth} & E2E & Yes & User logged out successfully & \textbf{PASS} \\ \midrule
+TC-BOOK-001 & \texttt{student-booking} & E2E & Yes & Booking created as pending & \textbf{PASS}$^{*}$ \\
+TC-BOOK-002 & \texttt{student-booking} & E2E & Yes & Overlap rejected with 409 & \textbf{PASS} \\
+TC-BOOK-003 & \texttt{bookings.create} & Int & Yes & Rejected booking on blocked slot & \textbf{PASS} \\
+TC-BOOK-004 & \texttt{bookings.create} & Int & Yes & Threw 500 on lower boundary limit & \textbf{FAIL} (DEF-010) \\
+TC-BOOK-007 & \texttt{bookings.create} & Int & Yes & Threw 500 on upper boundary limit & \textbf{FAIL} (DEF-010) \\
+TC-BOOK-008 & \texttt{student-booking} & E2E & Yes & Prevented empty purpose & \textbf{PASS} \\
+TC-BOOK-009 & \texttt{bookings.concurrency} & Int & Yes & Threw 500 on concurrent race & \textbf{FAIL} (DEF-002) \\ \midrule
+TC-PO-001 & \texttt{po-approval} & E2E & Yes & Dashboard populated with pending & \textbf{PASS} \\
+TC-PO-002 & \texttt{po-approval} & E2E & Yes & Status updated to approved & \textbf{PASS} \\
+TC-PO-003 & \texttt{po-approval} & E2E & Yes & Status updated to rejected & \textbf{PASS} \\
+TC-PO-004 & \texttt{po-approval} & E2E & Yes & Overlap blocked during setup & \textbf{FAIL} (DEF-002) \\ \midrule
+TC-CANCEL-001 & \texttt{cancellation} & E2E & Yes & Status updated to rejected & \textbf{FAIL} (DEF-001) \\
+TC-CANCEL-002 & \texttt{cancellation} & E2E & Yes & Cancel button missing from DOM & \textbf{FAIL} (DEF-004) \\
+TC-CANCEL-005 & \texttt{cancellation} & E2E & Yes & Status updated to rejected & \textbf{FAIL} (DEF-001) \\ \midrule
+TC-ADMIN-001 & \texttt{admin} & E2E & Yes & Student successfully added & \textbf{PASS} \\
+TC-ADMIN-002 & \texttt{admin} & E2E & Yes & Duplicate ERP registration blocked & \textbf{PASS} \\
+TC-ADMIN-003 & \texttt{admin} & E2E & Yes & PO member added successfully & \textbf{PASS} \\
+TC-ADMIN-004 & \texttt{admin} & E2E & Yes & Building added successfully & \textbf{PASS} \\
+TC-ADMIN-005 & \texttt{admin} & E2E & Yes & Room added successfully & \textbf{PASS} \\
+TC-ADMIN-006 & \texttt{admin.rooms} & Int & Yes & Slot blocked by Admin successfully & \textbf{PASS} \\
+TC-ADMIN-007 & \texttt{admin.rooms} & Int & Yes & Slot unblocked by Admin successfully & \textbf{PASS} \\ \midrule
+TC-DATA-001 & \texttt{bookings.data-integrity} & Int & Yes & reviewed\_by omitted in payload & \textbf{FAIL} (DEF-015) \\
+\end{longtable}
+\end{center}
+\noindent\textit{$^{*}$Note: Firefox E2E environment warning encountered on browser context cleanup; functional logic passed. Also, .spec.ts and .test.ts was removed from suite file names to fit table}
+
+\subsection{Metrics Analysis}
+\begin{itemize}
+    \item \textbf{Total Test Cases Specifed:} 27
+    \item \textbf{Total Test Cases Executed:} 27
+    \item \textbf{Total Test Case Passes:} 18
+    \item \textbf{Total Test Case Failures:} 9
+    \item \textbf{Core Failure Areas:} Core failures are concentrated in the booking boundary validation layer, the booking cancellation state-machine logic, and the database unique constraint configuration on inactive bookings.
+\end{itemize}
+
+\end{document}

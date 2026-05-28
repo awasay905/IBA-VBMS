@@ -1,0 +1,251 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Essential Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}       % Professional table rules
+\usepackage{tabularx}       % Autowrapping tables
+\usepackage{longtable}      % Multi-page tables
+\usepackage{xcolor}         % Visual accents
+\usepackage{enumitem}       % Spacing control in lists
+\usepackage{needspace}      % Prevent orphan headers
+\usepackage{microtype}      % Fine typography tuning
+\usepackage{tcolorbox}      % Executive callout boxes
+\usepackage{helvet}         % Clean sans-serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- Color Palette ---
+\definecolor{primaryblue}{RGB}{31, 78, 121}
+\definecolor{charcoal}{RGB}{50, 50, 50}
+\definecolor{passgreen}{RGB}{46, 125, 50}
+\definecolor{failred}{RGB}{198, 40, 40}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+
+% --- Custom Page Layout Adjustments ---
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% --- Document Header / Cover Page ---
+\begin{document}
+
+\begin{center}
+    \vspace*{1cm}
+    \rule{\textwidth}{1.5pt} \\[0.3cm]
+    {\huge \textbf{Test Summary \& Quality Evaluation Report}} \\[0.2cm]
+    {\large \textbf{IBA Campus Facility Booking System (CFBS) --- Cycle 1 Summary}} \\
+    \rule{\textwidth}{1.5pt} \\[1.5cm]
+    
+    \begin{tabular}{ll}
+        \textbf{Prepared by:} & Muhammad Imad Raza (26953)\\
+                             & Abdul Wasay Imran (27126) \\
+                             & Saad Imam (27079) \\
+                             & Syed Muhammad Deebaj Haider Kazmi (26012) \\[0.3cm]
+        \textbf{Reviewed \& Approved by:} & Muhammad Imad Raza (26953) \\
+        \textbf{Target System:} & NestJS REST Backend / React + Vite Frontend \\
+        \textbf{Testing Environment:} & Sandbox Sandbox-Supabase (PostgreSQL) \\
+        \textbf{Document Version:} & 1.0 (Final Evaluation) \\
+        \textbf{Date:} & May 28, 2026 \\
+    \end{tabular}
+\end{center}
+
+\vspace{1.5cm}
+
+\begin{tcolorbox}[colback=lightgray,colframe=primaryblue,title=\textbf{Executive Summary \& Release Recommendation}]
+This report provides a formal assessment of the quality state of the IBA Campus Facility Booking System (CFBS) following the completion of Test Cycle 1. Testing was performed across three execution boundaries: isolated unit testing, integration-level REST API testing, and end-to-end (E2E) automated browser verification.
+
+Based on the quantitative quality criteria defined in the CFBS Master Test Plan, the system is \textbf{not approved for release} to production. High-priority functional gaps, including four Severity-1 (Critical) database and validation defects, remain unresolved. Release sign-off is withheld pending a full regression cycle of the remediated codebase.
+\end{tcolorbox}
+
+\newpage
+
+% --- Section 1: Objectives & Scope ---
+\section{Scope \& Methodology}
+The primary objective of this testing cycle was to validate the functional integrity, security access boundaries, database transaction safety, and user-experience paths of the CFBS against the baseline Software Requirements Specification (SRS).
+
+The target of evaluation (TOE) comprised:
+\begin{itemize}[noitemsep]
+    \item \textbf{CFBS REST API Backend:} NestJS micro-architecture utilizing a remote, isolated PostgreSQL container (Supabase).
+    \item \textbf{CFBS Client Application:} Single-page React application compiled via Vite.
+\end{itemize}
+
+Testing was performed programmatically on an isolated loopback configuration. Database states were managed via transaction truncations and hardcoded static UUID injection (\texttt{seedTestData.sql}) before the execution of each isolated test suite to guarantee strict repeatability.
+
+\section{Requirements Coverage Analysis}
+A Comprehensive Traceability Map was maintained during this cycle to track the verification of the 37 distinct functional requirements defined in the CFBS SRS. 
+
+\begin{itemize}
+    \item \textbf{Requirements Mapped to Tests:} 100\% (37 out of 37 requirements were associated with at least one automated unit, integration, or E2E test case).
+    \item \textbf{Requirements Successfully Verified:} 75.6\% (28 out of 37 requirements passed all associated assertions).
+    \item \textbf{Unverified/Failed Requirements:} 24.4\% (9 requirements failed to resolve successfully due to active code-level defects).
+\end{itemize}
+
+The non-functional security requirements (Role-Based Access Control) were verified successfully. However, critical transaction-safety, boundary-limit, and state-machine requirements failed, as detailed in Section \ref{sec:failures}.
+
+\section{Test Execution Statistics}
+The CFBS test suite comprised 124 distinct test points distributed across three levels of the execution harness.
+
+\subsection{Execution Aggregates}
+The following table provides the quantitative pass/fail breakdown of the test runs:
+
+\begin{table}[h]
+\centering
+\caption{Test Run Performance Summary}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{lccccc}
+\toprule
+\textbf{Test Level} & \textbf{Harness} & \textbf{Executed} & \textbf{Passed} & \textbf{Failed} & \textbf{Pass Rate} \\ \midrule
+Unit Level & NestJS / Jest & 39 & 39 & 0 & 100.0\% \\
+Integration Level & Supertest / Express & 43 & 34 & 9 & 79.07\% \\
+End-to-End (E2E) & Playwright (Chrome/FF) & 42 & 35 & 7 & 83.33\% \\ \midrule
+\textbf{Total Aggregates} & & \textbf{124} & \textbf{108} & \textbf{16} & \textbf{87.09\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Module-Wise Performance}
+The test runs were distributed across six functional modules to evaluate quality density and isolate weak architectural layers:
+
+\begin{table}[h]
+\centering
+\caption{Module Performance Profile}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{lcccc}
+\toprule
+\textbf{Functional Module} & \textbf{Executed Tests} & \textbf{Passed} & \textbf{Failed} & \textbf{Pass Rate} \\ \midrule
+Authentication \& Authorization (\texttt{TC-AUTH}) & 28 & 28 & 0 & 100.0\% \\
+Room Booking Creation (\texttt{TC-BOOK}) & 16 & 12 & 4 & 75.00\% \\
+PO Dashboard Management (\texttt{TC-PO}) & 13 & 11 & 2 & 84.62\% \\
+Booking Cancellation (\texttt{TC-CANCEL}) & 22 & 13 & 9 & 59.09\% \\
+Admin Infrastructure Management (\texttt{TC-ADMIN}) & 44 & 44 & 0 & 100.0\% \\
+Data Integrity \& Audit Trails (\texttt{TC-DATA}) & 1 & 0 & 1 & 0.00\% \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\newpage
+
+% --- Section 4: Failure Analysis ---
+\section{Technical Defect Analysis} \label{sec:failures}
+During this execution cycle, a total of 15 unique defects were registered. The team classified these defects according to standard severity guidelines to understand their impact on core business flows.
+
+\subsection{Defect Severity and Density Distribution}
+\begin{itemize}[noitemsep]
+    \item \textbf{Severity-1 (Critical):} 4 defects (Functional blockers, database transaction crashes, or core constraint failures).
+    \item \textbf{Severity-2 (Major):} 9 defects (Major workflow deviations, missing cancellation buttons, or audit trail omissions).
+    \item \textbf{Severity-3 (Minor):} 2 defects (Configuration out-of-bounds or missing non-critical schema roles).
+    \item \textbf{Severity-4 (Trivial):} 0 defects (Cosmetic or minor spelling anomalies).
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Defect Matrix Summary}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{lp{8cm}cc}
+\toprule
+\textbf{Defect ID} & \textbf{Defect Summary Title} & \textbf{Severity} & \textbf{Status} \\ \midrule
+\texttt{DEF-001} & Cancelled bookings are incorrectly marked as 'rejected' & Severity-2 & Open \\
+\texttt{DEF-002} & Unconditional unique DB constraint blocks slot recycling & Severity-1 & Open \\
+\texttt{DEF-003} & Missing validation allows room bookings for past dates & Severity-2 & Open \\
+\texttt{DEF-004} & Approved bookings on student dashboard lack Cancel option & Severity-2 & Open \\
+\texttt{DEF-005} & Missing current-year constraint checks allow future reservations & Severity-2 & Open \\
+\texttt{DEF-006} & Time slot definitions violate SRS-defined business hours & Severity-3 & Open \\
+\texttt{DEF-007} & Lack of temporal check allows cancellation of elapsed bookings & Severity-2 & Open \\
+\texttt{DEF-008} & Disable Room requirement implemented only as slot blocks & Severity-2 & Open \\
+\texttt{DEF-009} & Missing 'Faculty/Teacher' user role in system schemas & Severity-3 & Open \\
+\texttt{DEF-010} & Missing range validation on slot ID crashes the database & Severity-1 & Open \\
+\texttt{DEF-011} & Cascade deletes destroy historical audit trails & Severity-1 & Open \\
+\texttt{DEF-012} & Student cancellation overwrites reviewer ID values & Severity-2 & Open \\
+\texttt{DEF-013} & Missing pagination on database query returns entire history & Severity-2 & Open \\
+\texttt{DEF-014} & Room Booking purpose input field vulnerable to stored XSS & Severity-2 & Open \\
+\texttt{DEF-015} & API SELECT projection explicitly omits \texttt{reviewed\_by} field & Severity-1 & Open \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Analysis of Core Architectural Failures}
+The QA team isolated three main root causes that contributed to the majority of integration and end-to-end test failures.
+
+\subsubsection{1. Database Constraint Inflexibility (\texttt{DEF-002})}
+The integration concurrency test (\texttt{TC-BOOK-009}) and the E2E PO conflict resolution test (\texttt{TC-PO-004}) failed due to an unconditional unique constraint in \texttt{supabase-schema.sql}:
+\begin{verbatim}
+    UNIQUE (room_id, date, slot_id)
+\end{verbatim}
+This constraint makes no distinction between active (pending, approved) and inactive (rejected, cancelled) bookings. As a result, once a slot is booked, any secondary pending request for the same slot is rejected immediately with a database error, rather than allowing multiple pending requests to reach the PO for review. Furthermore, if a booking is cancelled, that slot can never be re-booked, which prevents slot recycling.
+
+\subsubsection{2. Missing Range Validation on Inputs (\texttt{DEF-010})}
+The boundary integration tests (\texttt{TC-BOOK-004} and \texttt{TC-BOOK-007}) failed because out-of-bounds slot IDs (such as \texttt{slot\_id: 0} or \texttt{slot\_id: 8}) bypassed the NestJS validation layer. Because the \texttt{CreateBookingDto} only enforces a basic \texttt{@IsInt()} decorator, invalid values hit the database directly, resulting in an unhandled \texttt{500 Internal Server Error} instead of a clean \texttt{400 Bad Request} validation response.
+
+\subsubsection{3. Explicit Audit Trail Omission (\texttt{DEF-015})}
+During data integrity verification (\texttt{TC-DATA-001}), the test suite attempted to verify the \texttt{reviewed\_by} column in a retrieved booking. This assertion failed because the database projection string in \texttt{bookings.service.ts} explicitly excludes the \texttt{reviewed\_by} field:
+\begin{verbatim}
+    const SELECT = `id, date, slot_id, purpose, status, created_at, updated_at,
+      users!bookings_user_id_fkey(id, erp, name, email),
+      rooms(id, name, buildings(id, name)),
+      time_slots(id, start_time, end_time, label)`;
+\end{verbatim}
+By omitting this field from SELECT operations, the backend prevents the UI from displaying the required audit history showing which staff member approved or rejected each request.
+
+\newpage
+
+% --- Section 5: Plan Deviations ---
+\section{Deviations from the Test Plan}
+Three notable deviations from the Master Test Plan occurred during Cycle 1 execution:
+\begin{enumerate}
+\item \textbf{Use of Playwright instead of Selenium}: Playwright was choosen over selenium due to its ease in learning and better featrures
+    \item \textbf{E2E Browser Cleanup Warnings (Firefox):} Playwright tests executed on the Firefox engine occasionally threw context termination warnings (\textit{"Browser.removeBrowserContext: SSi is undefined"}). This was isolated to a browser-cleanup protocol error rather than CFBS client logic, so these warnings did not affect the functional pass-rate assessment.
+    \item \textbf{Temporal Boundaries (Manual Verification):} Automated checks for past-date cancellations (\texttt{TC-CANCEL-004}) were supplemented with manual API requests, as managing real-time system clock values in the testing database is highly prone to timing issues.
+    
+\end{enumerate}
+
+\section{Exit Criteria Assessment \& Release Recommendation}
+To determine release readiness, the Cycle 1 execution metrics were evaluated systematically against the exit criteria defined in Section 9.2 of the Master Test Plan.
+
+\begin{table}[h]
+\centering
+\caption{Exit Criteria Compliance Evaluation}
+\vspace{0.2cm}
+\begin{tabularx}{\textwidth}{lXcc}
+\toprule
+\textbf{Metric Name} & \textbf{Target Threshold} & \textbf{Actual Value} & \textbf{Compliance Status} \\ \midrule
+Unit Pass Rate & 100.0\% & 100.0\% (39/39) & \color{passgreen}\textbf{COMPLIANT} \\
+Integration Pass Rate & $\ge$ 95.0\% & 79.07\% (34/43) & \color{failred}\textbf{NON-COMPLIANT} \\
+E2E Pass Rate & $\ge$ 90.0\% & 83.33\% (35/42) & \color{failred}\textbf{NON-COMPLIANT} \\
+Severity-1 Resolution & 100.0\% Resolved & 4 Active Defects & \color{failred}\textbf{NON-COMPLIANT} \\
+Severity-2 Resolution & $\ge$ 85.0\% Resolved & 0\% Resolved & \color{failred}\textbf{NON-COMPLIANT} \\
+Requirements Traceability & 100.0\% Mapped & 100.0\% Mapped & \color{passgreen}\textbf{COMPLIANT} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Deficiency Summary:} The quality state of the application does not meet the standards required for release. Four critical Severity-1 defects remain open:
+\begin{itemize}[noitemsep]
+    \item Unconditional unique constraints that prevent slot recycling (\texttt{DEF-002}).
+    \item Missing range validation on inputs causing database crashes (\texttt{DEF-010}).
+    \item Cascade deletions that erase historical audit trails (\texttt{DEF-011}).
+    \item Omissions of crucial audit fields from API SELECT projections (\texttt{DEF-015}).
+\end{itemize}
+
+Additionally, the overall test pass rate of 87.09\% falls below the combined minimum threshold of 95.0\% required to assure transaction and state-machine stability.
+
+\textbf{Final Release Recommendation:} \textbf{NO-GO}. \\
+It is recommended that development resources be focused on fixing the unique index constraints, validation decorators, and cascading foreign keys. Once these code changes are complete, a full regression cycle must be executed to verify the fixes and confirm that the system meets all release criteria.
+
+% \vspace{1.5cm}
+
+% \begin{minipage}[t]{0.45\textwidth}
+%     \begin{center}
+%         \rule{5cm}{0.5pt} \\
+%         \textbf{Abdul Wasay Imran} \\
+%         Quality Assurance Engineer, Group 4
+%     \end{center}
+% \end{minipage}
+% \hfill
+% \begin{minipage}[t]{0.45\textwidth}
+%     \begin{center}
+%         \rule{5cm}{0.5pt} \\
+%         \textbf{Muhammad Imad Raza} \\
+%         Quality Assurance Lead
+%     \end{center}
+% \end{minipage}
+
+\end{document}
