@@ -6,7 +6,7 @@ OUTPUT_FILE = 'merged_code.txt'
 
 # Exclusion lists
 IGNORE_DIRS = {'node_modules', 'dist', '.git', '.vscode', 'build', '.next'}
-IGNORE_EXTENSIONS = {'.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.pdf', '.map'}
+IGNORE_EXTENSIONS = {'.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.pdf', '.map', 'webm'}
 IGNORE_FILES = {'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', OUTPUT_FILE}
 
 def should_ignore(path, is_dir=False):
