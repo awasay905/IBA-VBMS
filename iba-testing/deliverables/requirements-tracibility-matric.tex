@@ -1,0 +1,110 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}    % For professional table lines
+\usepackage{longtable}   % For tables spanning multiple pages
+\usepackage{array}       % For fixed-width columns
+\usepackage{caption}     % For table captions
+\usepackage{xcolor}      % For row shading
+\usepackage{helvet}      % Formal sans-serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- Document Metadata ---
+\title{\textbf{Requirements Traceability Matrix (RTM)}\\ \large IBA Campus Facility Booking System}
+\author{By: \\ Abdul Wasay Imran, Saad Imam, \\ Muhammad Imad Raza, Syed Muhammad Deebaj Haider Kazmi}
+\date{Version 1.0 --- \today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The Requirements Traceability Matrix (RTM) is a sub-deliverable of the Test Plan for the IBA Campus Facility Booking System. Its purpose is to ensure that all functional requirements defined in the Software Requirements Specification (SRS) are mapped to specific test cases. This ensures 100\% test coverage and validates that every system feature is verified during the testing lifecycle.
+
+\section{Traceability Matrix}
+
+\begin{longtable}{lp{5.5cm}cp{4cm}}
+\caption{Mapping Functional Requirements to Test Cases} \label{tab:rtm} \\
+\toprule
+\textbf{Req. ID} & \textbf{Requirement Description} & \textbf{Priority} & \textbf{Mapped Test Case ID(s)} \\ \midrule
+\endfirsthead
+
+\multicolumn{4}{c}%
+{{\bfseries \tablename\ \thetable{} -- Continued from previous page}} \\
+\toprule
+\textbf{Req. ID} & \textbf{Requirement Description} & \textbf{Priority} & \textbf{Mapped Test Case ID(s)} \\ \midrule
+\endhead
+
+\bottomrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+% --- 2.1 Authentication ---
+\multicolumn{4}{l}{\textit{\textbf{2.1 Authentication (Student / PO)}}} \\ \midrule
+REQ-1 & Login form for students (ERP/Pass) & High & TC-AUTH-001 \\
+REQ-2 & Login form for PO (User/Pass) & High & TC-AUTH-002 \\
+REQ-3 & Validate credentials against data & High & TC-AUTH-001, TC-AUTH-002 \\
+REQ-4 & Redirect to respective dashboard & High & TC-AUTH-001, TC-AUTH-002 \\
+REQ-5 & Error message for invalid login & High & TC-AUTH-003 \\
+REQ-6 & Prevent unauthorized dashboard access & High & TC-AUTH-004, TC-AUTH-005, TC-AUTH-006 \\ \midrule
+
+% --- 2.2 Request Room Booking ---
+\multicolumn{4}{l}{\textit{\textbf{2.2 Request Room Booking (Student)}}} \\ \midrule
+REQ-1 & Display list of buildings & High & TC-BOOK-001 \\
+REQ-2 & Display available rooms in building & High & TC-BOOK-001 \\
+REQ-3 & Select date/time (9AM-6PM) & High & TC-BOOK-004, TC-BOOK-005, TC-BOOK-006, TC-BOOK-007 \\
+REQ-4 & Prevent booking if room is busy/disabled & High & TC-BOOK-002, TC-BOOK-003 \\
+REQ-5 & Allow entry of booking purpose & Medium & TC-BOOK-008 \\
+REQ-6 & Forward request to PO \& Confirm & High & TC-BOOK-001 \\
+REQ-7 & Show conflict error message & High & TC-BOOK-002, TC-BOOK-009 \\
+REQ-8 & Maintain booking record & Medium & TC-DATA-001 \\ \midrule
+
+% --- 2.3 Accept/Reject Room Booking ---
+\multicolumn{4}{l}{\textit{\textbf{2.3 Accept/Reject Room Booking (PO)}}} \\ \midrule
+REQ-1 & List all pending requests & High & TC-PO-001 \\
+REQ-2 & Allow PO to approve or reject & High & TC-PO-002, TC-PO-003 \\
+REQ-3 & Update room schedule if approved & High & TC-PO-002 \\
+REQ-4 & Notify student of decision & High & TC-PO-002, TC-PO-003 \\
+REQ-5 & Prevent double booking if approved & High & TC-PO-004 \\ \midrule
+
+% --- 2.4 & 2.5 User Management ---
+\multicolumn{4}{l}{\textit{\textbf{2.4 \& 2.5 Add Student / PO Member (Admin)}}} \\ \midrule
+REQ-1 & Accept user details (ERP, Name, etc.) & High & TC-ADMIN-001, TC-ADMIN-003 \\
+REQ-2 & Validate unique ERP/Username & High & TC-ADMIN-002 \\
+REQ-3 & Create account and notify success & High & TC-ADMIN-001, TC-ADMIN-003 \\
+REQ-4 & Error on invalid input or exists & Medium & TC-ADMIN-002 \\ \midrule
+
+% --- 2.6 Disable Room ---
+\multicolumn{4}{l}{\textit{\textbf{2.6 Disable Room (Admin)}}} \\ \midrule
+REQ-1 & Admin select and disable room & Medium & TC-ADMIN-006 \\
+REQ-2 & Prevent future bookings for disabled & Medium & TC-BOOK-003, TC-ADMIN-006 \\
+REQ-3 & Show "disabled" status & Medium & TC-ADMIN-006, TC-ADMIN-007 \\ \midrule
+
+% --- 2.7 & 2.8 Room & Building Management ---
+\multicolumn{4}{l}{\textit{\textbf{2.7 \& 2.8 Add Room / Building (Admin)}}} \\ \midrule
+REQ-1 & Accept Room/Building details & Medium & TC-ADMIN-004, TC-ADMIN-005 \\
+REQ-2 & Validate unique names & Medium & TC-ADMIN-004, TC-ADMIN-005 \\
+REQ-3 & Add to database & Medium & TC-ADMIN-004, TC-ADMIN-005 \\
+REQ-4 & Show confirmation message & Medium & TC-ADMIN-004, TC-ADMIN-005 \\ \midrule
+
+% --- 2.9 Cancel Booking ---
+\multicolumn{4}{l}{\textit{\textbf{2.9 Cancel Booking (Student/PO/Admin)}}} \\ \midrule
+REQ-1 & Allow cancellation before start time & Medium & TC-CANCEL-001, TC-CANCEL-002, TC-CANCEL-003, TC-CANCEL-004 \\
+REQ-2 & Update status to "Cancelled" & Medium & TC-CANCEL-002 \\
+REQ-3 & Free the room slot after cancel & Medium & TC-CANCEL-002, TC-CANCEL-005 \\
+
+\end{longtable}
+
+\section{Summary of Coverage}
+\begin{itemize}
+    \item \textbf{Total Functional Requirements:} 37
+    \item \textbf{Total Test Cases Defined:} 33
+    \item \textbf{Test Coverage:} 100\% (Every requirement is mapped to at least one test case).
+    \item \textbf{High Priority Coverage:} All "High" priority requirements are covered by multiple functional and negative test scenarios.
+\end{itemize}
+
+\end{document}

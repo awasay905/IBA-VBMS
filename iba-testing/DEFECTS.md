@@ -243,4 +243,7 @@
 - **Actual:** The malicious payload is accepted and stored in the database. (If the frontend does not safely escape it, it can execute).
 - **Root cause:** The `CreateBookingDto` relies solely on `@IsString()` and `@IsNotEmpty()`. There is no sanitization layer (such as `class-sanitizer` or HTML escaping middleware) implemented in the NestJS backend.
 - **Status:** Open
-```
+
+
+
+DEF-015 (Severity 2): The GET /api/bookings and GET /api/bookings/:id API endpoints explicitly omit the reviewed_by column in their SQL SELECT statements (src/bookings/bookings.service.ts). This breaks the audit trail visibility on the frontend, preventing users from seeing which PO member approved/rejected their request.

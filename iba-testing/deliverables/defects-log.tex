@@ -1,0 +1,355 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}       % For professional table rules
+\usepackage{tabularx}       % For autowrapping tables (prevents spilloff)
+\usepackage{longtable}      % For multi-page tables
+\usepackage{listings}       % For code block formatting
+\usepackage{xcolor}         % For visual accents
+\usepackage{enumitem}       % To control spacing in lists
+\usepackage{needspace}      % To prevent orphan headers
+\usepackage{helvet}         % Standard clean sans-serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- Color Palette ---
+\definecolor{primaryblue}{RGB}{31, 78, 121}
+\definecolor{accentgray}{RGB}{242, 242, 242}
+\definecolor{darkgray}{RGB}{80, 80, 80}
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codepurple}{rgb}{0.5,0,0.5}
+
+% --- Listings (Code) Configuration ---
+\lstset{
+    backgroundcolor=\color{accentgray},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{primaryblue}\bfseries,
+    numberstyle=\tiny\color{darkgray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{lightgray}
+}
+
+% --- Custom Command for Defect Cards ---
+\newcommand{\defectheader}[5]{%
+    \needspace{6\baselineskip}
+    \noindent\colorbox{primaryblue}{\parbox{\dimexpr\textwidth-2\fboxsep\relax}{
+        \color{white}\bfseries\large\strut #1: #2
+    }}
+    \nopagebreak\\
+    \noindent\begin{tabularx}{\textwidth}{@{}X X X@{}}
+        \textbf{Reference TC:} #3 & \textbf{Severity:} #4 & \textbf{Status:} #5 \\
+    \end{tabularx}
+    \nopagebreak\vspace{0.1cm}
+    \nopagebreak\hrule\vspace{0.2cm}
+}
+
+% --- Document Metadata ---
+\title{
+    \rule{\textwidth}{1.5pt} \\
+    \textbf{\Large Defect Log \& Analysis Report} \\
+    \large IBA Campus Facility Booking System --- QA Artifact \\
+    \rule{\textwidth}{1.5pt}
+}
+\author{
+    \textbf{Prepared by Group 4:} \\
+    Abdul Wasay Imran (27126) \quad Saad Imam (27079) \\
+    Muhammad Imad Raza (26953) \quad Syed Muhammad Deebaj Haider Kazmi (26012)
+}
+\date{Version 1.0 --- \today}
+
+\begin{document}
+
+\maketitle
+\newpage
+% \tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Purpose}
+This document serves as the official Quality Assurance Defect Log for the IBA Campus Facility Booking System. It lists all issues discovered during the execution of system, integration, and end-to-end (E2E) automation test runs. This ledger acts as a key tracking mechanism to bridge communication between the QA and development teams, ensuring every gap identified against the Software Requirements Specification (SRS) is addressed prior to release.
+
+\subsection{Defect Classification System}
+Defects are assigned severity levels in accordance with the criteria defined within the Project Test Plan:
+\begin{itemize}[noitemsep,topsep=3pt]
+    \item \textbf{S1 (Critical):} System crash, database corruption, role-based security vulnerability, or functional blocker with no possible workaround.
+    \item \textbf{S2 (Major):} Core feature failure (such as cancellation or valid booking prevention) where no viable workaround exists for the user.
+    \item \textbf{S3 (Minor):} Functional or logical deviation that does not block core workflows; minor manual workarounds or simple configuration adjustments exist.
+    \item \textbf{S4 (Trivial):} Cosmetic issues, UI misalignments, spelling mistakes, or minor non-blocking dashboard formatting.
+\end{itemize}
+
+\subsection{Overall Defect Matrix Summary}
+The dynamic test runs revealed a total of \textbf{15 defects}. The distribution of severity levels across the discovered issues highlights critical database constraints and logical issues that are detailed later in this report:
+\begin{center}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+\textbf{Total Defects} & \textbf{S1 (Critical)} & \textbf{S2 (Major)} & \textbf{S3 (Minor)} & \textbf{S4 (Trivial)} \\ \midrule
+15 & 4 & 9 & 2 & 0 \\ \bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+\section{Defect Ledger Summary Table}
+To prevent layout spillover, this master summary table is formatted using autowrapping dynamic columns.
+
+\begin{center}
+\begin{longtable}{@{}llcp{6.5cm}c@{}}
+\caption{Master Defect Index} \label{tab:defect_index} \\
+\toprule
+\textbf{ID} & \textbf{TC Ref.} & \textbf{Sev.} & \textbf{Defect Summary Title} & \textbf{Status} \\ \midrule
+\endfirsthead
+\multicolumn{5}{c}{{\bfseries \tablename\ \thetable{} -- Continued from previous page}} \\
+\toprule
+\textbf{ID} & \textbf{TC Ref.} & \textbf{Sev.} & \textbf{Defect Summary Title} & \textbf{Status} \\ \midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+DEF-001 & TC-CANCEL-001/2/5 & S2 & Cancelled bookings are incorrectly marked as 'rejected' & Open \\
+DEF-002 & TC-BOOK/CANCEL-BUG & S1 & Unconditional unique DB constraint blocks slot re-booking & Open \\
+DEF-003 & TC-BOOK-PAST & S2 & Missing validation allows users to book rooms for past dates & Open \\
+DEF-004 & TC-CANCEL-002 & S2 & Student dashboard lacks 'Cancel' button on approved slots & Open \\
+DEF-005 & TC-BOOK-008 & S2 & Missing boundary check allows multi-year bookings & Open \\
+DEF-006 & TC-BOOK-004/5 & S3 & Time slots in schema violate business hours of 9 AM - 6 PM & Open \\
+DEF-007 & TC-CANCEL-004 & S2 & Missing boundary check allows cancellation of elapsed bookings & Open \\
+DEF-008 & TC-ADMIN-006 & S2 & 'Disable Room' implemented only as single slot blocking & Open \\
+DEF-009 & TC-AUTH-001 & S3 & Missing 'Faculty/Teacher' user role & Open \\
+DEF-010 & TC-BOOK-010 & S1 & Missing Range Validation on \texttt{slot\_id} crashes Database & Open \\
+DEF-011 & TC-DATA-002 & S1 & Cascade delete wipes out historical booking audit trails & Open \\
+DEF-012 & TC-DATA-001 & S2 & Student cancel overwrites PO reference in \texttt{reviewed\_by} & Open \\
+DEF-013 & TC-PO-001 & S2 & GET /bookings fetches all database records without pagination & Open \\
+DEF-014 & TC-SEC-001 & S2 & Room Booking purpose input is vulnerable to stored XSS & Open \\
+DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} field & Open \\
+\end{longtable}
+\end{center}
+
+\newpage
+\section{Detailed Defect Index (2 per Page)}
+
+% ================= PAGE 1 =================
+\defectheader{DEF-001}{Cancelled bookings are incorrectly marked as 'rejected'}{TC-CANCEL-001/002/005}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Authenticate as a student. 2. Create a pending room booking. 3. Send a \texttt{PATCH} to \texttt{/api/bookings/:id/cancel}. 4. Observe response.
+    \item \textbf{Expected:} Booking status field is updated to \texttt{"cancelled"}.
+    \item \textbf{Actual:} Booking status field returned is \texttt{"rejected"}.
+    \item \textbf{Root Cause:} In \texttt{bookings.service.ts}, the cancel controller hardcodes target status payload updates:
+    \begin{lstlisting}[language=Java]
+    async cancel(id: string, requesterId: string, requesterRole: string) {
+        return this.updateStatus(id, 'rejected', requesterId); // Hardcoded
+    }
+    \end{lstlisting}
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-002}{Unconditional DB unique constraint prevents slot recycling}{TC-BOOK-BUG / TC-CANCEL-BUG}{S1 (Critical)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Book Room A on slot 1. 2. Cancel or reject the booking. 3. Attempt to book the same room, date, and slot.
+    \item \textbf{Expected:} System accepts the booking (\texttt{201 Created}) because the slot is now free.
+    \item \textbf{Actual:} Database throws unhandled unique index violation, returning a server-side \texttt{500 Error}.
+    \item \textbf{Root Cause:} The schema definitions have an unconditional database table-level unique constraint: \texttt{UNIQUE(room\_id, date, slot\_id)}. This index includes inactive rows. It must be a conditional index targeting active rows:
+    \begin{lstlisting}[language=SQL]
+    CREATE UNIQUE INDEX idx_active_bookings ON bookings (room_id, date, slot_id) WHERE (status IN ('pending', 'approved'));
+    \end{lstlisting}
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 2 =================
+\defectheader{DEF-003}{Missing validation checks allow room bookings for past dates}{TC-BOOK-PAST}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in as a student. 2. Post a booking payload containing historical dates (e.g., \texttt{"2020-01-01"}).
+    \item \textbf{Expected:} Request rejected with a \texttt{400 Bad Request} validation error block.
+    \item \textbf{Actual:} System accepts the booking and creates a record in the database (\texttt{201 Created}).
+    \item \textbf{Root Cause:} \texttt{CreateBookingDto} checks only if \texttt{date} is a string. There are no application-level checks or custom decorators (e.g., \texttt{@IsFutureDate()}) in the validation layer to block past inputs.
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-004}{Approved bookings on student dashboard lack Cancel option}{TC-CANCEL-002}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in as a student. 2. View approved bookings on dashboard cards. 3. Look for a cancellation trigger button.
+    \item \textbf{Expected:} A cancellation button should display, as SRS 2.9 permits cancellation before the scheduled start time.
+    \item \textbf{Actual:} Cancel options only display for cards matching \texttt{"pending"}.
+    \item \textbf{Root Cause:} Inside the UI view layer (\texttt{StudentDashboard.jsx}), conditionally rendered control expressions are restricted using strict identity checks against \texttt{"pending"}, omitting \texttt{"approved"}.
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 3 =================
+\defectheader{DEF-005}{Missing current-year constraint checks allow future reservations}{TC-BOOK-008}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in as a student. 2. Submit booking request with date parameter set to \texttt{"2028-12-25"}.
+    \item \textbf{Expected:} Request rejected with validation errors, since SRS 2.2.3 limits bookings to the current year.
+    \item \textbf{Actual:} Request accepted (\texttt{201 Created}).
+    \item \textbf{Root Cause:} The client UI enforces constraints using local date ranges, but the API schema (\texttt{CreateBookingDto}) lacks logical constraints to compare incoming years with the current server year.
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-006}{Time slot definitions violate SRS-defined business hours}{TC-BOOK-004/005}{S3 (Minor)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in to the booking portal. 2. View dropdown options or query \texttt{/api/time-slots}.
+    \item \textbf{Expected:} The available time slots should exist within the SRS 2.2.3 window of 9 AM to 6 PM.
+    \item \textbf{Actual:} First slot starts at 8:30 AM, and the last slot ends at 6:45 PM.
+    \item \textbf{Root Cause:} Static row values in \texttt{init.sql} violate the boundaries defined in the SRS:
+    \begin{lstlisting}[language=SQL]
+    -- Violators:
+    (1, '08:30', '09:45', '8:30 - 9:45'),
+    (7, '17:30', '18:45', '5:30 - 6:45');
+    \end{lstlisting}
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 4 =================
+\defectheader{DEF-007}{Lack of temporal check allows cancellation of elapsed bookings}{TC-CANCEL-004}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Identify an approved booking from last week. 2. Send cancellation request to endpoint.
+    \item \textbf{Expected:} Cancellation fails with \texttt{400 Bad Request} because the booking has already passed.
+    \item \textbf{Actual:} Request processes successfully and status updates to cancelled (\texttt{200 OK}).
+    \item \textbf{Root Cause:} The backend \texttt{cancel()} method inside \texttt{bookings.service.ts} verifies row ownership and current status, but does not compare system times with the slot date.
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-008}{Disable Room requirement implemented only as slot blocks}{TC-ADMIN-006}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in as an admin. 2. Try to disable a room indefinitely for maintenance.
+    \item \textbf{Expected:} Admins can toggle a room status to inactive to block all bookings, per SRS 2.6.
+    \item \textbf{Actual:} Admins must manually block every individual time slot using \texttt{BlockedSlots}.
+    \item \textbf{Root Cause:} Database schema contains no \texttt{is\_active} or status flags on the \texttt{rooms} table.
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 5 =================
+\defectheader{DEF-009}{Missing 'Faculty/Teacher' user role in system schemas}{TC-AUTH-001}{S3 (Minor)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Attempt to register or configure an account with a role key of \texttt{faculty} or \texttt{teacher}.
+    \item \textbf{Expected:} System registers account, per SRS Objective 6 (distinguishing student and faculty applicants).
+    \item \textbf{Actual:} API returns an unhandled database error block.
+    \item \textbf{Root Cause:} Database role configurations do not include a faculty entry:
+    \begin{lstlisting}[language=SQL]
+    CREATE TYPE user_role AS ENUM('student', 'programoffice', 'admin'); -- Missing 'faculty'
+    \end{lstlisting}
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-010}{Missing range validation on slot ID crashes the database}{TC-BOOK-010}{S1 (Critical)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Authenticate as a student. 2. Send booking request with an invalid \texttt{slot\_id} (e.g., \texttt{9999}).
+    \item \textbf{Expected:} Request rejected with a validation error (\texttt{400 Bad Request}).
+    \item \textbf{Actual:} Database throws a foreign key constraint violation, causing an unhandled \texttt{500 Error}.
+    \item \textbf{Root Cause:} \texttt{CreateBookingDto} validates types using only \texttt{@IsInt()}. It lacks index range limits:
+    \begin{lstlisting}[language=Java]
+    // Fix:
+    @IsInt() @Min(1) @Max(7)
+    slot_id: number;
+    \end{lstlisting}
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 6 =================
+\defectheader{DEF-011}{Cascade deletes destroy historical audit trails}{TC-DATA-002}{S1 (Critical)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Identify a user with bookings. 2. As an Admin, run a delete call to \texttt{/api/users/:id}.
+    \item \textbf{Expected:} User deletion blocks, soft-deletes, or nullifies the field to preserve booking history.
+    \item \textbf{Actual:} All associated booking history records are permanently deleted.
+    \item \textbf{Root Cause:} Foreign key constraints on the backend database are configured with cascade deletes:
+    \begin{lstlisting}[language=SQL]
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE -- Wipes booking history
+    \end{lstlisting}
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-012}{Student cancellation overwrites reviewer ID values}{TC-DATA-001}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Book a room. 2. Have the PO approve it. 3. Cancel booking as student. 4. Query DB record.
+    \item \textbf{Expected:} \texttt{reviewed\_by} retains the PO UUID, while a separate cancellation actor field updates.
+    \item \textbf{Actual:} \texttt{reviewed\_by} is overwritten with the student's ID.
+    \item \textbf{Root Cause:} Inside \texttt{bookings.service.ts}, the student cancel handler routes to updateStatus:
+    \begin{lstlisting}[language=Java]
+    // Student UUID passes as the reviewer parameter:
+    return this.updateStatus(id, 'rejected', requesterId); 
+    \end{lstlisting}
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 7 =================
+\defectheader{DEF-013}{Missing pagination on database query returns entire booking history}{TC-PO-001 / TC-PERF-001}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Seed database with 5,000+ entries. 2. Access PO portal. 3. Monitor payload scale and rendering lag.
+    \item \textbf{Expected:} System requests and returns targeted page segments (e.g., limit of 50).
+    \item \textbf{Actual:} Server yields massive array blocks containing every record, slowing page performance.
+    \item \textbf{Root Cause:} Database retrieval logic in \texttt{bookings.service.ts} uses simple select scans:
+    \begin{lstlisting}[language=Java]
+    this.supabase.db.from('bookings').select(SELECT) // Lacks page size/limit constraints
+    \end{lstlisting}
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+
+\defectheader{DEF-014}{Room Booking purpose input field vulnerable to stored XSS}{TC-SEC-001}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Log in as a student. 2. Submit purpose field containing markup: \texttt{<script>alert('xss')</script>}.
+    \item \textbf{Expected:} Request is sanitized or rejected before storage.
+    \item \textbf{Actual:} API accepts and stores payload tags. (If the frontend does not safely escape it, it can execute).
+    \item \textbf{Root Cause:} \texttt{CreateBookingDto} validates inputs as standard strings via \texttt{@IsString()}, but performs no sanitization or tag filtering before writing to the database.
+\end{itemize}
+
+\newpage
+
+% ================= PAGE 8 =================
+\defectheader{DEF-015}{API SELECT statements explicitly omit reviewer ID field}{TC-DATA-001}{S2 (Major)}{Open}
+\begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
+    \item \textbf{Steps to Reproduce:} 
+    1. Approve a booking. 2. Send a \texttt{GET} request to \texttt{/api/bookings} or \texttt{/api/bookings/:id}.
+    \item \textbf{Expected:} Returned response payload contains the \texttt{reviewed\_by} field to trace approval history.
+    \item \textbf{Actual:} The field is omitted, breaking the frontend audit trail.
+    \item \textbf{Root Cause:} Inside \texttt{bookings.service.ts}, the select query projection explicitly excludes the \texttt{reviewed\_by} field, making it impossible for the UI to display which PO member authorized a request:
+    \begin{lstlisting}[language=Java]
+    // In bookings.service.ts:
+    const SELECT = 'id, user_id, room_id, slot_id, date, purpose, status'; // Missing reviewed_by
+    \end{lstlisting}
+\end{itemize}
+
+\vspace{0.4cm}\hrule\vspace{0.4cm}
+\begin{center}
+\textit{--- End of Defect Log Report ---}
+\end{center}
+
+\end{document}
