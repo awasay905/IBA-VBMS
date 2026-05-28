@@ -88,7 +88,14 @@ export class BookingsService {
       .insert({ user_id: userId, room_id: dto.room_id, date: dto.date, slot_id: dto.slot_id, purpose: dto.purpose, status: 'pending' })
       .select(SELECT)
       .single();
-    if (error) throw error;
+    if (error) {
+      // Handle the Race Condition: PostgreSQL error code 23505 is a unique constraint violation
+      // This happens if another request inserted the same slot between our check and our insert.
+      if (error.code === '23505') {
+        throw new ConflictException('This slot was just booked by another user');
+      }
+      throw error;
+    }
     return data;
   }
 
