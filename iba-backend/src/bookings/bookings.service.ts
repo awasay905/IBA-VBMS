@@ -11,7 +11,7 @@ export class CreateBookingDto {
 }
 
 const SELECT = `
-  id, date, slot_id, purpose, status, created_at, updated_at,
+  id, date, slot_id, purpose, status, reviewed_by, created_at, updated_at,
   users!bookings_user_id_fkey(id, erp, name, email),
   rooms(id, name, buildings(id, name)),
   time_slots(id, start_time, end_time, label)
