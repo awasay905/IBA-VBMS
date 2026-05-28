@@ -74,11 +74,6 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
     });
 
     test("TC-CANCEL-002 — student cancels own approved booking (DEF-004)", async ({ page }) => {
-        // We explicitly tell Playwright this will fail due to a known UI bug.
-        // Once the developer fixes the UI, this test will trigger a "Expected to fail, but passed" warning,
-        // prompting you to remove `test.fail()`.
-        test.fail(true, "DEF-004: Student dashboard does not show 'Cancel' button for approved bookings");
-
         const purpose = "Approved Cancellation Test";
         await createStudentBooking(page, purpose);
 
@@ -101,12 +96,20 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
         // 3. Locate the card and attempt to cancel
         const bookingCard = page.locator(".card", { hasText: purpose });
         page.on("dialog", (dialog) => dialog.accept());
-
-        // This action will Timeout/Fail because the button is missing from the DOM (DEF-004)
         await bookingCard.getByRole("button", { name: "Cancel" }).click();
 
-        // 4. Verify the success alert (Won't be reached until bug is fixed)
-        await expect(page.getByText("Booking cancelled successfully")).toBeVisible();
+        // 4. Verify the success alert
+        const successAlert = page.getByText("Booking cancelled successfully");
+        const errorAlert = page.locator(".alert-error");
+
+        await expect(async () => {
+            const errorVisible = await errorAlert.isVisible();
+            if (errorVisible) {
+                const errorText = await errorAlert.textContent();
+                throw new Error(`Booking cancellation failed with UI error: "${errorText}"`);
+            }
+            await expect(successAlert).toBeVisible({ timeout: 10000 });
+        }).toPass({ timeout: 20000 });
     });
 
     test("TC-CANCEL-005 — PO cancels an approved booking", async ({ page }) => {
@@ -134,7 +137,17 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
         await approvedRow.getByRole("button", { name: "Cancel" }).click();
 
         // 6. Verify movement to Rejected/Cancelled state
-        await expect(page.getByText("Booking cancelled successfully!")).toBeVisible();
+        const successAlert = page.getByText("Booking cancelled successfully");
+        const errorAlert = page.locator(".alert-error");
+
+        await expect(async () => {
+            const errorVisible = await errorAlert.isVisible();
+            if (errorVisible) {
+                const errorText = await errorAlert.textContent();
+                throw new Error(`Booking cancellation failed with UI error: "${errorText}"`);
+            }
+            await expect(successAlert).toBeVisible({ timeout: 10000 });
+        }).toPass({ timeout: 20000 });
         await page.getByRole("button", { name: "Rejected" }).click();
         await expect(page.locator("tr", { hasText: "PO Kill Test" })).toBeVisible();
     });

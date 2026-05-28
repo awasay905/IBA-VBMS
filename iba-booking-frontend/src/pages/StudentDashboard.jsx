@@ -268,7 +268,7 @@ export default function StudentDashboard({ user }) {
                                 </div>
 
                                 {/* Actions */}
-                                {booking.status === "pending" && (
+                                {(booking.status === "pending" || booking.status === "approved") && (
                                     <div className="w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-100 flex justify-end">
                                         <button
                                             onClick={() => handleCancel(booking.id)}
