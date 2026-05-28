@@ -177,7 +177,7 @@ describe("BookingsService", () => {
         });
 
         // Test Case 9: Successful Booking Cancellation (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)
-        it("should successfully cancel a booking and update status to 'rejected' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)", async () => {
+        it("should successfully cancel a booking and update status to 'cancelled' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)", async () => {
             const requesterId = "student-a";
             const requesterRole = "student";
             const targetBookingId = "booking-123";
@@ -190,7 +190,7 @@ describe("BookingsService", () => {
 
             const mockCancelledBooking = {
                 ...mockDbBooking,
-                status: "rejected", // Acts as cancelled
+                status: "cancelled",
                 reviewed_by: requesterId,
             };
 
@@ -202,7 +202,7 @@ describe("BookingsService", () => {
             const result = await service.cancel(targetBookingId, requesterId, requesterRole);
 
             expect(mockQueryBuilder.update).toHaveBeenCalledWith({
-                status: "rejected",
+                status: "cancelled",
                 reviewed_by: requesterId,
             });
             expect(mockQueryBuilder.eq).toHaveBeenLastCalledWith("id", targetBookingId);

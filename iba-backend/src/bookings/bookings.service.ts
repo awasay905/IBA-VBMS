@@ -114,10 +114,9 @@ export class BookingsService {
       throw new BadRequestException('Only pending or approved bookings can be cancelled');
     }
 
-    // Update status directly to 'cancelled', DO NOT touch reviewed_by
   const { data, error } = await this.supabase.db
     .from('bookings')
-    .update({ status: 'cancelled' })
+    .update({ status: 'cancelled', reviewed_by: requesterId })
     .eq('id', id)
     .select(SELECT)
     .single();
