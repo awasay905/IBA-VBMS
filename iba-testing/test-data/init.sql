@@ -110,10 +110,15 @@ CREATE TABLE bookings (
     status booking_status NOT NULL DEFAULT 'pending',
     reviewed_by UUID REFERENCES users (id), -- PO or admin who actioned it
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    -- Prevent double-booking same room+date+slot
-    UNIQUE (room_id, date, slot_id)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+
+CREATE UNIQUE INDEX idx_active_bookings 
+ON bookings (room_id, date, slot_id) 
+WHERE status IN ('pending', 'approved');
+
+
 
 
 -- ── BLOCKED SLOTS ────────────────────────────────────────────
