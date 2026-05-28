@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
-import { IsUUID, IsInt, IsString, IsNotEmpty, IsDateString } from 'class-validator';
+import { IsUUID, IsInt, IsString, IsNotEmpty, IsDateString, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateBookingDto {
   @IsUUID()                    room_id: string;
   @IsDateString()              date: string;
-  @Type(()=>Number) @IsInt()   slot_id: number;
+  @Type(()=>Number) @IsInt() @Min(1) @Max(7)  slot_id: number;
   @IsString() @IsNotEmpty()    purpose: string;
 }
 
