@@ -114,9 +114,16 @@ CREATE TABLE bookings (
 );
 
 
-CREATE UNIQUE INDEX idx_active_bookings 
+-- Constraint: Only ONE student can be 'approved' for a specific slot.
+CREATE UNIQUE INDEX idx_one_approval_per_slot 
 ON bookings (room_id, date, slot_id) 
-WHERE status IN ('pending', 'approved');
+WHERE (status = 'approved');
+
+-- Constraint: A specific student cannot have more than one 
+-- 'pending' or 'approved' request for the exact same slot.
+CREATE UNIQUE INDEX idx_one_active_per_user 
+ON bookings (room_id, date, slot_id, user_id) 
+WHERE (status IN ('pending', 'approved'));
 
 
 

@@ -259,9 +259,13 @@ test.describe("PO (TC-PO)", () => {
         // Switch to the 'Rejected' tab
         await page.getByRole("button", { name: "Rejected" }).click();
 
-        // Assert that Student B's request is now here
-        const rowB = page.locator("tr", { hasText: purposeB });
+        // Assert that Student B's request is now here by looking for their ERP
+        // purposeB might have changed, but USERS.student2.erp is guaranteed to be there
+        const rowB = page.locator("tr", { hasText: USERS.student2.erp });
         await expect(rowB).toBeVisible();
         await expect(rowB).toContainText("rejected");
+
+        // Optional: verify the original purpose is still there if you didn't overwrite it
+        await expect(rowB).toContainText(purposeB);
     });
 });

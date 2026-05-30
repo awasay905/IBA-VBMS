@@ -1,67 +1,68 @@
 import request from "supertest";
 import { BASE_URL } from "./helpers/env.helper";
 import { resetDatabase } from "./helpers/seed.helper";
-import { getStudentToken, getStudent2Token } from "./helpers/auth.helper";
+import { getStudentToken, getStudent2Token, getPOToken } from "./helpers/auth.helper";
 
 jest.setTimeout(30000);
 
-describe("Booking Concurrency Feature", () => {
-    it("TC-BOOK-009: simultaneous booking requests for the exact same slot must result in exactly one success and one conflict failure", async () => {
-        // 1. Reset database to clear any active schedules
+describe("PO Approval Concurrency", () => {
+    it("TC-BOOK-009: simultaneous approval of different requests for the same slot must result in one success and one conflict", async () => {
         await resetDatabase();
 
-        // 2. Fetch tokens for both distinct test students
-        const student1Token = await getStudentToken();
-        const student2Token = await getStudent2Token();
+        const s1Token = await getStudentToken();
+        const s2Token = await getStudent2Token();
+        const poToken = await getPOToken();
 
-        // Hardcoded Room A ID from seedTestData.sql
         const roomAId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+        const date = "2026-12-01";
+        const slot = 3;
 
-        // Pick a future date and slot with no existing bookings
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + 25);
-        const bookingDate = targetDate.toISOString().split("T")[0];
-        const targetSlotId = 3;
+        // 1. Both students successfully apply for the same slot
+        const res1 = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${s1Token}`)
+            .send({
+                room_id: roomAId,
+                date,
+                slot_id: slot,
+                purpose: "Student 1 Request",
+            })
+            .expect(201);
 
-        // Define both concurrent booking request payloads
-        const request1 = request(BASE_URL).post("/api/bookings").set("Authorization", `Bearer ${student1Token}`).send({
-            room_id: roomAId,
-            date: bookingDate,
-            slot_id: targetSlotId,
-            purpose: "Concurrency Test - Student 1",
-        });
+        const res2 = await request(BASE_URL)
+            .post("/api/bookings")
+            .set("Authorization", `Bearer ${s2Token}`)
+            .send({
+                room_id: roomAId,
+                date,
+                slot_id: slot,
+                purpose: "Student 2 Request",
+            })
+            .expect(201);
 
-        const request2 = request(BASE_URL).post("/api/bookings").set("Authorization", `Bearer ${student2Token}`).send({
-            room_id: roomAId,
-            date: bookingDate,
-            slot_id: targetSlotId,
-            purpose: "Concurrency Test - Student 2",
-        });
+        const idA = res1.body.id;
+        const idB = res2.body.id;
 
-        // 3. Fire both requests simultaneously
-        const results = await Promise.allSettled([request1, request2]);
+        // 2. PO tries to approve Student A and Student B SIMULTANEOUSLY
+        const approveA = request(BASE_URL)
+            .patch(`/api/bookings/${idA}/approve`)
+            .set("Authorization", `Bearer ${poToken}`)
+            .send();
+        const approveB = request(BASE_URL)
+            .patch(`/api/bookings/${idB}/approve`)
+            .set("Authorization", `Bearer ${poToken}`)
+            .send();
 
-        const statuses: number[] = [];
+        const results = await Promise.allSettled([approveA, approveB]);
+        const statuses = results.map((r) => (r.status === "fulfilled" ? r.value.status : 0));
 
-        results.forEach((result) => {
-            if (result.status === "fulfilled") {
-                statuses.push(result.value.status);
-            } else {
-                // If a request fails at the network layer, capture the error details
-                console.error("Request rejected at network/supertest level:", result.reason);
-            }
-        });
-
-        // 4. Assertions to confirm system data consistency:
-        // Exactly one student must successfully claim the slot (201 Created).
-        // Exactly one student must be rejected with a conflict error (409 Conflict).
-        expect(statuses.length).toBe(2);
-        expect(statuses).toContain(201);
+        // 3. Assertions:
+        // One PO action must succeed (200), the other must be blocked by the DB index (409)
+        expect(statuses).toContain(200);
         expect(statuses).toContain(409);
 
-        // Verify the status counts to confirm there is no double booking scenario
-        const successCount = statuses.filter((status) => status === 201).length;
-        const conflictCount = statuses.filter((status) => status === 409).length;
+        const successCount = statuses.filter((s) => s === 200).length;
+        const conflictCount = statuses.filter((s) => s === 409).length;
 
         expect(successCount).toBe(1);
         expect(conflictCount).toBe(1);
