@@ -189,6 +189,23 @@ export class BookingsService {
             throw new BadRequestException("Only pending or approved bookings can be cancelled");
         }
 
+        // 2. Extract Date and Time components
+        // booking.date is "2025-06-10"
+        // booking.time_slots.start_time is "09:00"
+        const [year, month, day] = (booking.date as string).split("-").map(Number);
+        const [hours, minutes] = (booking as any).time_slots.start_time.split(":").map(Number);
+
+        // 3. Create a JS Date object for the Slot Start Time
+        // Note: Month is 0-indexed in JS (January is 0)
+        const slotStartTime = new Date(year, month - 1, day, hours, minutes);
+        const now = new Date();
+
+        // 4. SRS 2.9 REQ-1 Validation
+        // But only for approved bookings. Pending bookings can be cancelled anytime by the student.
+        if ((booking as any).status === "approved" && now > slotStartTime) {
+            throw new BadRequestException("SRS Validation Error: Cannot cancel a booking after the start time.");
+        }
+
         const { data, error } = await this.supabase.db
             .from("bookings")
             .update({ status: "cancelled", reviewed_by: requesterId })

@@ -188,8 +188,10 @@ describe("BookingsService", () => {
 
             const mockDbBooking = {
                 id: targetBookingId,
-                status: "approved",
-                users: { id: requesterId }, // Authorized owner
+                status: "pending",
+                date: "2026-01-01",
+                users: { id: "student-a" }, // Owned by student-a
+                time_slots: { start_time: "08:30" }
             };
 
             const mockCancelledBooking = {
