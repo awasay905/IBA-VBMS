@@ -167,3 +167,5 @@ ALTER TABLE time_slots    ENABLE ROW LEVEL SECURITY;
 
 -- Allow service role to bypass RLS (this is the default in Supabase)
 -- No additional policies needed since we use service_role key server-side.
+
+ALTER TABLE rooms ADD CONSTRAINT unique_room_per_building UNIQUE (building_id, name);
