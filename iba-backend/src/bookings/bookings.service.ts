@@ -38,6 +38,8 @@ export function IsNotPastDate(validationOptions?: ValidationOptions) {
                 validate(value: any, args: ValidationArguments) {
                     const bookingDate = new Date(value);
                     const today = new Date();
+                    const currentYear = new Date().getFullYear();
+                    if (bookingDate.getFullYear() !== currentYear) return false;
                     // Reset time to start of day for accurate date-only comparison
                     today.setHours(0, 0, 0, 0);
                     return bookingDate >= today;
