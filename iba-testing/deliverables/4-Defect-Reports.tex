@@ -120,21 +120,21 @@ To prevent layout spillover, this master summary table is formatted using autowr
 \bottomrule
 \endlastfoot
 
-DEF-001 & TC-CANCEL-001/2/5 & S2 & Cancelled bookings are incorrectly marked as 'rejected' & Open \\
-DEF-002 & TC-BOOK/CANCEL-BUG & S1 & Unconditional unique DB constraint blocks slot re-booking & Open \\
-DEF-003 & TC-BOOK-PAST & S2 & Missing validation allows users to book rooms for past dates & Open \\
-DEF-004 & TC-CANCEL-002 & S2 & Student dashboard lacks 'Cancel' button on approved slots & Open \\
+DEF-001 & TC-CANCEL-001/2/5 & S2 & Cancelled bookings are incorrectly marked as 'rejected' & Fixed \\
+DEF-002 & TC-BOOK/CANCEL-BUG & S1 & Unconditional unique DB constraint blocks slot re-booking & Fixed \\
+DEF-003 & TC-BOOK-PAST & S2 & Missing validation allows users to book rooms for past dates & Fixed \\
+DEF-004 & TC-CANCEL-002 & S2 & Student dashboard lacks 'Cancel' button on approved slots & Fixed \\
 DEF-005 & TC-BOOK-008 & S2 & Missing boundary check allows multi-year bookings & Open \\
 DEF-006 & TC-BOOK-004/5 & S3 & Time slots in schema violate business hours of 9 AM - 6 PM & Open \\
-DEF-007 & TC-CANCEL-004 & S2 & Missing boundary check allows cancellation of elapsed bookings & Open \\
+DEF-007 & TC-CANCEL-004 & S2 & Missing boundary check allows cancellation of elapsed bookings & Fixed \\
 DEF-008 & TC-ADMIN-006 & S2 & 'Disable Room' implemented only as single slot blocking & Open \\
 DEF-009 & TC-AUTH-001 & S3 & Missing 'Faculty/Teacher' user role & Open \\
-DEF-010 & TC-BOOK-010 & S1 & Missing Range Validation on \texttt{slot\_id} crashes Database & Open \\
+DEF-010 & TC-BOOK-010 & S1 & Missing Range Validation on \texttt{slot\_id} crashes Database & Fixed \\
 DEF-011 & TC-DATA-002 & S1 & Cascade delete wipes out historical booking audit trails & Open \\
 DEF-012 & TC-DATA-001 & S2 & Student cancel overwrites PO reference in \texttt{reviewed\_by} & Open \\
 DEF-013 & TC-PO-001 & S2 & GET /bookings fetches all database records without pagination & Open \\
 DEF-014 & TC-SEC-001 & S2 & Room Booking purpose input is vulnerable to stored XSS & Open \\
-DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} field & Open \\
+DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} field & Fixed \\
 \end{longtable}
 \end{center}
 
@@ -142,7 +142,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 \section{Detailed Defect Index (2 per Page)}
 
 % ================= PAGE 1 =================
-\defectheader{DEF-001}{Cancelled bookings are incorrectly marked as 'rejected'}{TC-CANCEL-001/002/005}{S2 (Major)}{Open}
+\defectheader{DEF-001}{Cancelled bookings are incorrectly marked as 'rejected'}{TC-CANCEL-001/002/005}{S2 (Major)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Authenticate as a student. 2. Create a pending room booking. 3. Send a \texttt{PATCH} to \texttt{/api/bookings/:id/cancel}. 4. Observe response.
@@ -158,7 +158,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 
 \vspace{0.4cm}\hrule\vspace{0.4cm}
 
-\defectheader{DEF-002}{Unconditional DB unique constraint prevents slot recycling}{TC-BOOK-BUG / TC-CANCEL-BUG}{S1 (Critical)}{Open}
+\defectheader{DEF-002}{Unconditional DB unique constraint prevents slot recycling}{TC-BOOK-BUG / TC-CANCEL-BUG}{S1 (Critical)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Book Room A on slot 1. 2. Cancel or reject the booking. 3. Attempt to book the same room, date, and slot.
@@ -173,7 +173,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 \newpage
 
 % ================= PAGE 2 =================
-\defectheader{DEF-003}{Missing validation checks allow room bookings for past dates}{TC-BOOK-PAST}{S2 (Major)}{Open}
+\defectheader{DEF-003}{Missing validation checks allow room bookings for past dates}{TC-BOOK-PAST}{S2 (Major)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Log in as a student. 2. Post a booking payload containing historical dates (e.g., \texttt{"2020-01-01"}).
@@ -184,7 +184,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 
 \vspace{0.4cm}\hrule\vspace{0.4cm}
 
-\defectheader{DEF-004}{Approved bookings on student dashboard lack Cancel option}{TC-CANCEL-002}{S2 (Major)}{Open}
+\defectheader{DEF-004}{Approved bookings on student dashboard lack Cancel option}{TC-CANCEL-002}{S2 (Major)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Log in as a student. 2. View approved bookings on dashboard cards. 3. Look for a cancellation trigger button.
@@ -224,7 +224,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 \newpage
 
 % ================= PAGE 4 =================
-\defectheader{DEF-007}{Lack of temporal check allows cancellation of elapsed bookings}{TC-CANCEL-004}{S2 (Major)}{Open}
+\defectheader{DEF-007}{Lack of temporal check allows cancellation of elapsed bookings}{TC-CANCEL-004}{S2 (Major)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Identify an approved booking from last week. 2. Send cancellation request to endpoint.
@@ -261,7 +261,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 
 \vspace{0.4cm}\hrule\vspace{0.4cm}
 
-\defectheader{DEF-010}{Missing range validation on slot ID crashes the database}{TC-BOOK-010}{S1 (Critical)}{Open}
+\defectheader{DEF-010}{Missing range validation on slot ID crashes the database}{TC-BOOK-010}{S1 (Critical)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Authenticate as a student. 2. Send booking request with an invalid \texttt{slot\_id} (e.g., \texttt{9999}).
@@ -334,7 +334,7 @@ DEF-015 & TC-DATA-001 & S2 & API SELECT explicitly omits \texttt{reviewed\_by} f
 \newpage
 
 % ================= PAGE 8 =================
-\defectheader{DEF-015}{API SELECT statements explicitly omit reviewer ID field}{TC-DATA-001}{S2 (Major)}{Open}
+\defectheader{DEF-015}{API SELECT statements explicitly omit reviewer ID field}{TC-DATA-001}{S2 (Major)}{Fixed}
 \begin{itemize}[noitemsep,topsep=1pt,leftmargin=0.5cm]
     \item \textbf{Steps to Reproduce:} 
     1. Approve a booking. 2. Send a \texttt{GET} request to \texttt{/api/bookings} or \texttt{/api/bookings/:id}.

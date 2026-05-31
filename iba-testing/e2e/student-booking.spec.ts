@@ -15,71 +15,65 @@ test.describe("Booking (TC-Book)", () => {
         const eightDaysFromNow = new Date();
         eightDaysFromNow.setDate(eightDaysFromNow.getDate() + 8);
 
-        // Format the date to YYYY-MM-DD using local time to prevent timezone shift issues
-        const year = eightDaysFromNow.getFullYear();
-        const monthVal = String(eightDaysFromNow.getMonth() + 1).padStart(2, "0");
-        const dayVal = String(eightDaysFromNow.getDate()).padStart(2, "0");
-        const formatted = `${year}-${monthVal}-${dayVal}`;
-
-        const timeSlot = 3; // 11:30 - 12:45
-
         // Get Day Number (e.g., "30") from local date
         const day = eightDaysFromNow.getDate();
 
-        // Get Short Month Name (e.g., "May" or "Jun") from local date
-        const shortMonth = eightDaysFromNow.toLocaleDateString("en-US", { month: "short" });
+        // Get Short Month Name (e.g., "May" or "Jun") from local date (convert to uppercase for card date block matching)
+        const shortMonthUpper = eightDaysFromNow.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
 
         // Login
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "My Bookings" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Student Portal" })).toBeVisible();
         await expect(page.getByText("Test Student")).toBeVisible();
 
-        // Select Building
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
+        // 1. Click New Request tab
+        await page.getByRole("button", { name: "New Request" }).click();
 
-        // Wait for the Room dropdown to become active and populated
-        const roomDropdown = page.getByRole("combobox").nth(1);
-        await expect(roomDropdown).not.toBeDisabled();
-        await expect(roomDropdown.locator("option").nth(1)).toBeAttached();
+        // 2. Select Date from Calendar (Navigate months if needed)
+        const targetMonthName = eightDaysFromNow.toLocaleString("default", { month: "long" });
+        const targetYear = eightDaysFromNow.getFullYear();
+        const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
 
-        // Select Room
-        await roomDropdown.selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(formatted);
-        await page.getByRole("combobox").nth(2).selectOption(timeSlot.toString());
-        await page.getByRole("textbox", { name: "Describe the activity..." }).fill(bookingPurpose);
+        while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+            // Click visual chevron-right to navigate calendar month
+            await page.getByRole("button").nth(5).click();
+        }
+        await page.getByRole("button", { name: String(day), exact: true }).click();
 
-        // 1. Submit the form
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
+        // 3. Select Building
+        await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
 
-        // 2. Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("Booking request submitted successfully!");
-        const errorAlert = page.locator(".alert-error");
+        // 4. Click Room Button (Rooms render as buttons instead of a select dropdown)
+        const roomButton = page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false });
+        await expect(roomButton).toBeVisible();
+        await roomButton.click();
 
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking submission failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // 5. Select Time Slot 3 ("11:30 AM - 12:45 PM")
+        await page.getByRole("button", { name: "11:30 AM - 12:45 PM", exact: false }).click();
 
-        // 3. Wait for success alert to disappear
-        await expect(successAlert).toBeHidden({ timeout: 10000 });
+        // 6. Fill out Purpose Description
+        await page.getByPlaceholder("e.g., Society meeting").fill(bookingPurpose);
 
-        // 4. Locate the specific newly created booking block to prevent strict-mode ambiguity
+        // 7. Submit Request
+        await page.getByRole("button", { name: "Submit Request" }).click();
+
+        // 8. Assert Success Toast
+        const successAlert = page.getByText("Reservation submitted successfully!");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
+
+        // 9. Locate the specific newly created booking block inside the visual listing
         const newBookingCard = page.locator(".card", { hasText: bookingPurpose });
         await expect(newBookingCard).toBeVisible({ timeout: 10000 });
 
-        // Perform inner assertions scoped strictly inside the new booking card
-        await expect(newBookingCard.getByRole("heading", { name: "Test Room A" })).toBeVisible();
+        // Perform inner assertions scoped inside the card
+        await expect(newBookingCard.getByText("Test Room A")).toBeVisible();
         await expect(newBookingCard.getByText("Test Building")).toBeVisible();
-        await expect(newBookingCard.locator("span").filter({ hasText: ":30 – 12:45" })).toBeVisible();
-        await expect(newBookingCard.getByText("pending")).toBeVisible();
-        await expect(newBookingCard.getByText(shortMonth, { exact: true })).toBeVisible();
+        await expect(newBookingCard.getByText("11:30 AM - 12:45 PM")).toBeVisible();
+        await expect(newBookingCard.locator(".badge")).toHaveText(/pending/i);
+        await expect(newBookingCard.getByText(shortMonthUpper, { exact: true })).toBeVisible();
         await expect(newBookingCard.getByText(day.toString(), { exact: true })).toBeVisible();
     });
 
@@ -89,96 +83,100 @@ test.describe("Booking (TC-Book)", () => {
         // Use 9 days from now to keep dates separate from previous tests
         const nineDaysFromNow = new Date();
         nineDaysFromNow.setDate(nineDaysFromNow.getDate() + 9);
-
-        const year = nineDaysFromNow.getFullYear();
-        const monthVal = String(nineDaysFromNow.getMonth() + 1).padStart(2, "0");
-        const dayVal = String(nineDaysFromNow.getDate()).padStart(2, "0");
-        const formatted = `${year}-${monthVal}-${dayVal}`;
-
-        const timeSlot = "2"; // Represents slot 2
+        const day = nineDaysFromNow.getDate();
 
         // Login
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "My Bookings" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Student Portal" })).toBeVisible();
 
-        // Helper function to handle dropdown selections and text fills
+        // Helper function to navigate step-by-step wizard
         const fillAndSubmitForm = async (purpose: string) => {
-            await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-            const roomDropdown = page.getByRole("combobox").nth(1);
-            await expect(roomDropdown).not.toBeDisabled();
-            await expect(roomDropdown.locator("option").nth(1)).toBeAttached();
-            await roomDropdown.selectOption(ROOMS.testRoomA.id);
-            await page.locator('input[type="date"]').fill(formatted);
-            await page.getByRole("combobox").nth(2).selectOption(timeSlot);
-            await page.getByRole("textbox", { name: "Describe the activity..." }).fill(purpose);
-            await page.getByRole("button", { name: "Submit Booking Request" }).click();
+            await page.getByRole("button", { name: "New Request" }).click();
+
+            // Select Date from Calendar
+            const targetMonthName = nineDaysFromNow.toLocaleString("default", { month: "long" });
+            const targetYear = nineDaysFromNow.getFullYear();
+            const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
+
+            while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+                await page.getByRole("button").nth(5).click();
+            }
+            await page.getByRole("button", { name: String(day), exact: true }).click();
+
+            // Select Building & Room
+            await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+            const roomButton = page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false });
+            await expect(roomButton).toBeVisible();
+            await roomButton.click();
+
+            // Select Time Slot 2 ("10:00 AM - 11:15 AM")
+            await page.getByRole("button", { name: "10:00 AM - 11:15 AM", exact: false }).click();
+
+            // Fill Purpose & Submit
+            await page.getByPlaceholder("e.g., Society meeting").fill(purpose);
+            await page.getByRole("button", { name: "Submit Request" }).click();
         };
 
         // First booking attempt
         await fillAndSubmitForm(bookingPurpose);
 
-        // Verify first submission success
-        const successAlert = page.getByText("Booking request submitted successfully!");
+        // Verify first submission success toast
+        const successAlert = page.getByText("Reservation submitted successfully!");
         await expect(successAlert).toBeVisible();
-        await expect(successAlert).toBeHidden({ timeout: 10000 });
 
         // Try submitting the exact same room, date, and slot
         await fillAndSubmitForm("Duplicate Test Booking Second");
 
-        // Assert that the request fails with an error alert containing a rejection message
-        const errorAlert = page.locator(".alert-error");
+        // Assert that duplicate requests trigger a rejection toast message
+        const errorAlert = page.getByText(/already|conflict|booked|overlap/i);
         await expect(errorAlert).toBeVisible({ timeout: 10000 });
-        await expect(errorAlert).toHaveText(/already|conflict|booked|overlap/i);
     });
 
     test("TC-BOOK-008 — missing purpose", async ({ page }) => {
         // Use 10 days from now
         const tenDaysFromNow = new Date();
         tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10);
-
-        const year = tenDaysFromNow.getFullYear();
-        const monthVal = String(tenDaysFromNow.getMonth() + 1).padStart(2, "0");
-        const dayVal = String(tenDaysFromNow.getDate()).padStart(2, "0");
-        const formatted = `${year}-${monthVal}-${dayVal}`;
-
-        const timeSlot = "3";
+        const day = tenDaysFromNow.getDate();
 
         // Login
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "My Bookings" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Student Portal" })).toBeVisible();
 
         // Fill building, room, date, and slot
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-        const roomDropdown = page.getByRole("combobox").nth(1);
-        await expect(roomDropdown).not.toBeDisabled();
-        await expect(roomDropdown.locator("option").nth(1)).toBeAttached();
-        await roomDropdown.selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(formatted);
-        await page.getByRole("combobox").nth(2).selectOption(timeSlot);
+        await page.getByRole("button", { name: "New Request" }).click();
 
-        // Leave the purpose field empty
-        const purposeField = page.getByRole("textbox", { name: "Describe the activity..." });
+        // Select Date from Calendar
+        const targetMonthName = tenDaysFromNow.toLocaleString("default", { month: "long" });
+        const targetYear = tenDaysFromNow.getFullYear();
+        const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
+
+        while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+            await page.getByRole("button").nth(5).click();
+        }
+        await page.getByRole("button", { name: String(day), exact: true }).click();
+
+        // Select Building & Room
+        await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+        const roomButton = page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false });
+        await expect(roomButton).toBeVisible();
+        await roomButton.click();
+
+        // Select Time Slot 3 ("11:30 AM - 12:45 PM")
+        await page.getByRole("button", { name: "11:30 AM - 12:45 PM", exact: false }).click();
+
+        // Leave purpose field empty
+        const purposeField = page.getByPlaceholder("e.g., Society meeting");
         await purposeField.fill("");
 
-        // Submit
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
-
-        // Handle both native HTML5 validation constraints and custom UI alerts
-        const hasRequiredAttribute = (await purposeField.getAttribute("required")) !== null;
-        if (hasRequiredAttribute) {
-            // Evaluate the HTML5 validity state of the textarea
-            const isValid = await purposeField.evaluate((el: HTMLTextAreaElement) => el.checkValidity());
-            expect(isValid).toBe(false);
-        } else {
-            // Fallback to checking for application UI error notifications
-            const errorAlert = page.locator(".alert-error");
-            await expect(errorAlert).toBeVisible();
-        }
+        // In the updated StudentDashboard.jsx, the Submit button is disabled if purpose.trim() is false
+        // This ensures the application validation is enforced visually in the DOM
+        const submitButton = page.getByRole("button", { name: "Submit Request" });
+        await expect(submitButton).toBeDisabled();
     });
 });

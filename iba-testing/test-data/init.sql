@@ -83,20 +83,20 @@ CREATE TABLE time_slots (
     id INTEGER PRIMARY KEY,
     start_time VARCHAR(5) NOT NULL, -- e.g. "08:30"
     end_time VARCHAR(5) NOT NULL, -- e.g. "09:45"
-    label VARCHAR(30) NOT NULL -- e.g. "8:30 – 9:45"
+    label VARCHAR(30) NOT NULL -- e.g. "8:30 - 9:45"
 );
 
 
 INSERT INTO
     time_slots (id, start_time, end_time, label)
 VALUES
-    (1, '08:30', '09:45', '8:30 – 9:45'),
-    (2, '10:00', '11:15', '10:00 – 11:15'),
-    (3, '11:30', '12:45', '11:30 – 12:45'),
-    (4, '13:00', '14:15', '1:00 – 2:15'),
-    (5, '14:30', '15:45', '2:30 – 3:45'),
-    (6, '16:00', '17:15', '4:00 – 5:15'),
-    (7, '17:30', '18:45', '5:30 – 6:45');
+    (1, '08:30', '09:45', '8:30 - 9:45'),
+    (2, '10:00', '11:15', '10:00 - 11:15'),
+    (3, '11:30', '12:45', '11:30 - 12:45'),
+    (4, '13:00', '14:15', '1:00 - 2:15'),
+    (5, '14:30', '15:45', '2:30 - 3:45'),
+    (6, '16:00', '17:15', '4:00 - 5:15'),
+    (7, '17:30', '18:45', '5:30 - 6:45');
 
 
 -- ── BOOKINGS ─────────────────────────────────────────────────
@@ -110,10 +110,22 @@ CREATE TABLE bookings (
     status booking_status NOT NULL DEFAULT 'pending',
     reviewed_by UUID REFERENCES users (id), -- PO or admin who actioned it
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    -- Prevent double-booking same room+date+slot
-    UNIQUE (room_id, date, slot_id)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+
+-- Constraint: Only ONE student can be 'approved' for a specific slot.
+CREATE UNIQUE INDEX idx_one_approval_per_slot 
+ON bookings (room_id, date, slot_id) 
+WHERE (status = 'approved');
+
+-- Constraint: A specific student cannot have more than one 
+-- 'pending' or 'approved' request for the exact same slot.
+CREATE UNIQUE INDEX idx_one_active_per_user 
+ON bookings (room_id, date, slot_id, user_id) 
+WHERE (status IN ('pending', 'approved'));
+
+
 
 
 -- ── BLOCKED SLOTS ────────────────────────────────────────────
@@ -312,3 +324,5 @@ ALTER TABLE time_slots enable ROW level security;
 
 -- Allow service role to bypass RLS (this is the default in Supabase)
 -- No additional policies needed since we use service_role key server-side.
+
+ALTER TABLE rooms ADD CONSTRAINT unique_room_per_building UNIQUE (building_id, name);

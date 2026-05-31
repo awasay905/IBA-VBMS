@@ -16,25 +16,25 @@ test.describe("Admin Management (TC-ADMIN)", () => {
 
         // 1. Login as Admin
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.admin.erp);
-        await page.getByLabel("Password").fill(USERS.admin.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.admin.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.admin.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         // 2. Click Students Tab
         await page.getByRole("button", { name: "Students" }).click();
 
         // 3. Insert Details
-        await page.getByRole("textbox").first().fill(testErp);
-        await page.getByRole("textbox").nth(1).fill(testName);
-        await page.locator('input[type="email"]').fill(testEmail);
-        await page.locator('input[type="password"]').fill(testPassword);
+        await page.getByPlaceholder("e.g. 24510").fill(testErp);
+        await page.getByPlaceholder("Jane Doe").fill(testName);
+        await page.getByPlaceholder("student@iba.edu.pk").fill(testEmail);
+        await page.getByPlaceholder("••••••••").fill(testPassword);
 
         // 4. Click Add Student
-        await page.getByRole("button", { name: "Add Student" }).click();
+        await page.getByRole("button", { name: "Enroll Student" }).click();
 
         // 5. Await and see the confirmation dialogue
         // 5.1 Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("Student added successfully");
+        const successAlert = page.getByText("Student enrolled successfully.");
         const errorAlert = page.locator(".alert-error");
 
         await expect(async () => {
@@ -58,21 +58,21 @@ test.describe("Admin Management (TC-ADMIN)", () => {
     test("TC-ADMIN-002 — add student with duplicate ERP", async ({ page }) => {
         // 1. Login as Admin
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.admin.erp);
-        await page.getByLabel("Password").fill(USERS.admin.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.admin.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.admin.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         // 2. Click Students Tab
         await page.getByRole("button", { name: "Students" }).click();
 
         // 3. Insert Details of student already seeded in DB
-        await page.getByRole("textbox").first().fill(USERS.student.erp);
-        await page.getByRole("textbox").nth(1).fill("testName");
-        await page.locator('input[type="email"]').fill("testEmail@email.email");
-        await page.locator('input[type="password"]').fill(USERS.student.password);
+        await page.getByPlaceholder("e.g. 24510").fill(USERS.student.erp);
+        await page.getByPlaceholder("Jane Doe").fill("testName");
+        await page.getByPlaceholder("student@iba.edu.pk").fill("testEmail@email.email");
+        await page.getByPlaceholder("••••••••").fill(USERS.student.password);
 
         // 4. Click Add Student
-        await page.getByRole("button", { name: "Add Student" }).click();
+        await page.getByRole("button", { name: "Enroll Student" }).click();
 
         // 5. Await and see the confirmation dialogue
         // 5.1 Wait for error
@@ -98,25 +98,25 @@ test.describe("Admin Management (TC-ADMIN)", () => {
 
         // 1. Login as Admin
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.admin.erp);
-        await page.getByLabel("Password").fill(USERS.admin.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.admin.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.admin.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         // 2. Click PO Members Tab
-        await page.getByRole("button", { name: "PO Members" }).click();
+        await page.getByRole("button", { name: "Staff" }).click();
 
         // 3. Insert Details
-        await page.getByRole("textbox").first().fill(testErp);
-        await page.getByRole("textbox").nth(1).fill(testName);
-        await page.locator('input[type="email"]').fill(testEmail);
-        await page.locator('input[type="password"]').fill(testPassword);
+        await page.getByPlaceholder("e.g. PO-102").fill(testErp);
+        await page.getByPlaceholder("John Smith").fill(testName);
+        await page.getByPlaceholder("po@iba.edu.pk").fill(testEmail);
+        await page.getByPlaceholder("••••••••").fill(testPassword);
 
         // 4. Click Add PO Member
-        await page.getByRole("button", { name: "Add PO Member" }).click();
+        await page.getByRole("button", { name: "Appoint Staff" }).click();
 
         // 5. Await and see the confirmation dialogue
         // 5.1 Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("PO Member added successfully");
+        const successAlert = page.getByText("PO Member appointed successfully.");
         const errorAlert = page.locator(".alert-error");
 
         await expect(async () => {
@@ -143,23 +143,23 @@ test.describe("Admin Management (TC-ADMIN)", () => {
 
         // 1. Login as Admin
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.admin.erp);
-        await page.getByLabel("Password").fill(USERS.admin.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.admin.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.admin.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         // 2. Click Buildings Tab
         await page.getByRole("button", { name: "Buildings" }).click();
 
         // 3. Insert Details
-        await page.getByRole("textbox").first().fill(testBuildingName);
-        await page.getByRole("textbox").nth(1).fill(testBuildingLocation);
+        await page.getByPlaceholder("e.g. Aman CED").fill(testBuildingName);
+        await page.getByPlaceholder("e.g. Main Campus").fill(testBuildingLocation);
 
         // 4. Add
-        await page.getByRole("button", { name: "Add Building" }).click();
+        await page.getByRole("button", { name: "Register Building" }).click();
 
         // 5. Await and see the confirmation dialogue
         // 5.1 Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("Building added successfully");
+        const successAlert = page.getByText("Building registered successfully.");
         const errorAlert = page.locator(".alert-error");
 
         await expect(async () => {
@@ -187,25 +187,25 @@ test.describe("Admin Management (TC-ADMIN)", () => {
 
         // 1. Login as Admin
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.admin.erp);
-        await page.getByLabel("Password").fill(USERS.admin.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.admin.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.admin.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         // 2. Click Rooms Tab
         await page.getByRole("button", { name: "Rooms" }).click();
 
         // 3. Fill Details
-        await page.getByRole("textbox").fill(newRoomName);
+        await page.getByPlaceholder("e.g. Tabba-201").fill(newRoomName);
         await page.getByRole("combobox").first().selectOption(newRoomBuilding.id);
-        await page.getByRole("spinbutton").fill(newRoomCapacity);
+        await page.getByPlaceholder("e.g. 50").fill(newRoomCapacity);
         await page.getByRole("combobox").nth(1).selectOption(newRoomType);
 
         // 4. Add
-        await page.getByRole("button", { name: "Add Room" }).click();
+        await page.getByRole("button", { name: "Allocate Room" }).click();
 
         // 5. Await and see the confirmation dialogue
         // 5.1 Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("Room added successfully");
+        const successAlert = page.getByText("Room allocated successfully.");
         const errorAlert = page.locator(".alert-error");
 
         await expect(async () => {

@@ -8,12 +8,12 @@
         "db:init": "ts-node scripts/seedDb.ts --init",
         "db:seed": "ts-node scripts/seedDb.ts --seed",
         "test:unit": "jest --selectProjects unit --passWithNoTests",
-        "test:integration": "jest --selectProjects integration --runInBand",
+        "test:integration": "npm run db:init && npm run db:seed && jest --selectProjects integration --runInBand",
         "test:e2e": "playwright test",
         "test:e2e:headed": "playwright test --headed",
         "test:e2e:report": "playwright show-report reports/playwright",
         "test:e2e:codegen": "playwright codegen http://localhost:5173",
-        "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e"
+        "test:all": "npm run db:init && npm run db:seed && npm run test:unit && npm run test:integration && npm run test:e2e"
     },
     "keywords": [],
     "author": "",

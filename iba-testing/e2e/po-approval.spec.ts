@@ -9,13 +9,7 @@ test.describe("PO (TC-PO)", () => {
     const eightDaysFromNow = new Date();
     eightDaysFromNow.setDate(eightDaysFromNow.getDate() + 8);
 
-    // Format the date to YYYY-MM-DD using local time to prevent timezone shift issues
-    const year = eightDaysFromNow.getFullYear();
-    const monthVal = String(eightDaysFromNow.getMonth() + 1).padStart(2, "0");
-    const dayVal = String(eightDaysFromNow.getDate()).padStart(2, "0");
-    const formatted = `${year}-${monthVal}-${dayVal}`;
-
-    // After all tests are done, reset db for next broswer
+    // After all tests are done, reset db for next browser
     test.afterAll(async () => {
         await resetDatabase();
     });
@@ -24,84 +18,76 @@ test.describe("PO (TC-PO)", () => {
     test.beforeEach(async ({ page }) => {
         await resetDatabase();
 
-        const timeSlot = 3; // 11:30 - 12:45
-
-        // Get Day Number (e.g., "30") from local date
         const day = eightDaysFromNow.getDate();
+        const shortMonthUpper = eightDaysFromNow.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
 
-        // Get Short Month Name (e.g., "May" or "Jun") from local date
-        const shortMonth = eightDaysFromNow.toLocaleDateString("en-US", { month: "short" });
-
-        // Login
+        // 1. Login Student
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "My Bookings" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Student Portal" })).toBeVisible();
         await expect(page.getByText("Test Student")).toBeVisible();
 
-        // Select Building
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
+        // 2. Open New Request form
+        await page.getByRole("button", { name: "New Request" }).click();
 
-        // Wait for the Room dropdown to become active and populated
-        const roomDropdown = page.getByRole("combobox").nth(1);
-        await expect(roomDropdown).not.toBeDisabled();
-        await expect(roomDropdown.locator("option").nth(1)).toBeAttached();
+        // 3. Select Date from Calendar
+        const targetMonthName = eightDaysFromNow.toLocaleString("default", { month: "long" });
+        const targetYear = eightDaysFromNow.getFullYear();
+        const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
 
-        // Select Room
-        await roomDropdown.selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(formatted);
-        await page.getByRole("combobox").nth(2).selectOption(timeSlot.toString());
-        await page.getByRole("textbox", { name: "Describe the activity..." }).fill(bookingPurpose);
+        while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+            await page.getByRole("button").nth(5).click();
+        }
+        await page.getByRole("button", { name: String(day), exact: true }).click();
 
-        // 1. Submit the form
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
+        // 4. Select Building & Room
+        await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+        const roomButton = page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false });
+        await expect(roomButton).toBeVisible();
+        await roomButton.click();
 
-        // 2. Wait for either success or catch the error message for debugging
-        const successAlert = page.getByText("Booking request submitted successfully!");
-        const errorAlert = page.locator(".alert-error");
+        // 5. Select Time Slot 3 ("11:30 AM - 12:45 PM")
+        await page.getByRole("button", { name: "11:30 AM - 12:45 PM", exact: false }).click();
+        await page.getByPlaceholder("e.g., Society meeting").fill(bookingPurpose);
 
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking submission failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // 6. Submit request
+        await page.getByRole("button", { name: "Submit Request" }).click();
 
-        // 3. Wait for success alert to disappear
-        await expect(successAlert).toBeHidden({ timeout: 10000 });
+        // 7. Verify Success Toast
+        const successAlert = page.getByText("Reservation submitted successfully!");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
 
-        // 4. Locate the specific newly created booking block to prevent strict-mode ambiguity
+        // 8. Locate card in Reservations list
         const newBookingCard = page.locator(".card", { hasText: bookingPurpose });
         await expect(newBookingCard).toBeVisible({ timeout: 10000 });
 
-        // Perform inner assertions scoped strictly inside the new booking card
-        await expect(newBookingCard.getByRole("heading", { name: "Test Room A" })).toBeVisible();
+        // Scoped inner assertions to confirm card metadata
+        await expect(newBookingCard.getByText("Test Room A")).toBeVisible();
         await expect(newBookingCard.getByText("Test Building")).toBeVisible();
-        await expect(newBookingCard.locator("span").filter({ hasText: ":30 – 12:45" })).toBeVisible();
-        await expect(newBookingCard.getByText("pending")).toBeVisible();
-        await expect(newBookingCard.getByText(shortMonth, { exact: true })).toBeVisible();
+        await expect(newBookingCard.getByText("11:30 AM - 12:45 PM")).toBeVisible();
+        await expect(newBookingCard.locator(".badge")).toHaveText(/pending/i);
+        await expect(newBookingCard.getByText(shortMonthUpper, { exact: true })).toBeVisible();
         await expect(newBookingCard.getByText(day.toString(), { exact: true })).toBeVisible();
 
-        // Logout after creating the booking
+        // Logout
         await page.getByRole("button", { name: "Logout" }).click();
     });
 
     test("TC-PO-001 — view pending requests", async ({ page }) => {
         // Login as PO
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "Booking Requests Management" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Program Office" })).toBeVisible();
         await expect(page.getByText("Test PO")).toBeVisible();
 
         // Making sure we are on pending tab
-        await expect(page.getByRole("cell", { name: "pending" })).toBeVisible();
+        await expect(page.getByRole("cell", { name: "Pending" })).toBeVisible();
 
-        // Verify the booking details are correct
+        // Verify the booking details exist in the workspace table
         await expect(page.locator("tbody")).toContainText(ROOMS.testRoomA.name);
         await expect(page.locator("tbody")).toContainText(BUILDINGS.testBuilding.name);
         await expect(page.locator("tbody")).toContainText(bookingPurpose);
@@ -111,157 +97,145 @@ test.describe("PO (TC-PO)", () => {
     test("TC-PO-002 — approve a pending request", async ({ page }) => {
         // Login as PO
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "Booking Requests Management" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Program Office" })).toBeVisible();
         await expect(page.getByText("Test PO")).toBeVisible();
 
         // Making sure we are on pending tab
-        await expect(page.getByRole("cell", { name: "pending" })).toBeVisible();
+        await expect(page.getByRole("cell", { name: "Pending" })).toBeVisible();
 
-        // Find the row specifically by the unique purpose
+        // Find row by purpose
         const pendingRow = page.locator("tr", { hasText: bookingPurpose });
         await expect(pendingRow).toBeVisible();
 
-        // Click Approve inside THAT specific row
+        // Approved action is direct (no nested confirm step required)
         await pendingRow.getByRole("button", { name: "Approve" }).click();
 
-        // Wait for the success alert to appear and verify its text ()
-        const successAlert = page.getByText("Booking approved successfully!");
-        const errorAlert = page.locator(".alert-error");
-
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking approval failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // Wait for success toast
+        const successAlert = page.getByText("Reservation request formally approved.");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
 
         // Go to approved bookings tab
         await page.getByRole("button", { name: "Approved" }).click();
 
-        // Verify the row now exists in the Approved tab
+        // Verify row exists inside the Approved tab list
         const approvedRow = page.locator("tr", { hasText: bookingPurpose });
         await expect(approvedRow).toBeVisible();
-        await expect(page.locator("tbody")).toContainText("approved");
 
-        // 6. Assertions within the row to ensure data integrity
+        // Assert row metadata
         await expect(approvedRow).toContainText(USERS.student.erp);
         await expect(approvedRow).toContainText(ROOMS.testRoomA.name);
-        await expect(approvedRow).toContainText("approved");
-
-        // Fix: Use the correct time string for slot 3
-        await expect(approvedRow).toContainText("11:30 – 12:45");
+        await expect(approvedRow.locator(".badge")).toHaveText(/approved/i);
+        await expect(approvedRow).toContainText("11:30 AM - 12:45 PM");
     });
 
     test("TC-PO-003 — reject a pending request", async ({ page }) => {
         // Login as PO
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
-        await expect(page.getByRole("heading", { name: "Booking Requests Management" })).toBeVisible();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
+        await expect(page.getByRole("heading", { name: "Program Office" })).toBeVisible();
         await expect(page.getByText("Test PO")).toBeVisible();
 
         // Making sure we are on pending tab
-        await expect(page.getByRole("cell", { name: "pending" })).toBeVisible();
+        await expect(page.getByRole("cell", { name: "Pending" })).toBeVisible();
 
-        // Find the row specifically by the unique purpose
+        // Find row specifically by unique purpose
         const pendingRow = page.locator("tr", { hasText: bookingPurpose });
         await expect(pendingRow).toBeVisible();
 
-        // Click Reject inside THAT specific row
+        // Trigger rejection flow
         await pendingRow.getByRole("button", { name: "Reject" }).click();
 
-        // Wait for the success alert to appear and verify its text ()
-        const successAlert = page.getByText("Booking rejected successfully!");
-        const errorAlert = page.locator(".alert-error");
+        // Click "Yes" inside the row-nested confirm popup block
+        await pendingRow.getByRole("button", { name: "Yes" }).click();
 
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking rejection failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // Await Toast feedback
+        const successAlert = page.getByText("Reservation request rejected.");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
 
         // Go to rejected bookings tab
         await page.getByRole("button", { name: "Rejected" }).click();
 
-        // Verify the row now exists in the Rejected tab
+        // Verify row inside Rejected tab
         const rejectedRow = page.locator("tr", { hasText: bookingPurpose });
         await expect(rejectedRow).toBeVisible();
-        await expect(page.locator("tbody")).toContainText("rejected");
 
-        // 6. Assertions within the row to ensure data integrity
+        // Assert row metadata
         await expect(rejectedRow).toContainText(USERS.student.erp);
         await expect(rejectedRow).toContainText(ROOMS.testRoomA.name);
-        await expect(rejectedRow).toContainText("rejected");
-
-        // Fix: Use the correct time string for slot 3
-        await expect(rejectedRow).toContainText("11:30 – 12:45");
+        await expect(rejectedRow.locator(".badge")).toHaveText(/rejected/i);
+        await expect(rejectedRow).toContainText("11:30 AM - 12:45 PM");
     });
 
     test("TC-PO-004 — conflict resolution: auto-reject overlapping requests", async ({ page }) => {
-        const dateForConflict = formatted; // Using the same date as other tests
-        const slotForConflict = "4"; // Using slot 4 (13:00 – 14:15)
+        const dateForConflict = eightDaysFromNow;
+        const day = dateForConflict.getDate();
         const purposeA = "Student A - High Priority Meeting";
         const purposeB = "Student B - Overlapping Request";
 
-        // --- STEP 1: Student 1 creates a booking ---
-        await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        // Helper workflow to submit student requests
+        const submitStudentRequest = async (erp: string, pass: string, purpose: string) => {
+            await page.goto("/");
+            await page.getByPlaceholder("e.g. 12345").fill(erp);
+            await page.getByPlaceholder("Enter your password").fill(pass);
+            await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-        await page.getByRole("combobox").nth(1).selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(dateForConflict);
-        await page.getByRole("combobox").nth(2).selectOption(slotForConflict);
-        await page.getByPlaceholder("Describe the activity...").fill(purposeA);
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
-        await expect(page.getByText("Booking request submitted successfully!")).toBeVisible();
-        await page.getByRole("button", { name: "Logout" }).click();
+            await page.locator(".nav-tabs").getByRole("button", { name: "New Request" }).click();
 
-        // --- STEP 2: Student 2 attempts to create an overlapping booking ---
-        // NOTE: This step will FAIL today because of DEF-002.
-        // Once you fix the DB constraint to a Partial Index, this will pass.
-        await page.getByLabel("ERP / Username").fill(USERS.student2.erp);
-        await page.getByLabel("Password").fill(USERS.student2.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+            // Select Date
+            const targetMonthName = dateForConflict.toLocaleString("default", { month: "long" });
+            const targetYear = dateForConflict.getFullYear();
+            const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
 
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-        await page.getByRole("combobox").nth(1).selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(dateForConflict);
-        await page.getByRole("combobox").nth(2).selectOption(slotForConflict);
-        await page.getByPlaceholder("Describe the activity...").fill(purposeB);
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
+            while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+                await page.getByRole("button").nth(5).click();
+            }
+            await page.getByRole("button", { name: String(day), exact: true }).click();
 
-        // This assertion expects the system to allow multiple "Pending" requests
-        await expect(page.getByText("Booking request submitted successfully!")).toBeVisible();
-        await page.getByRole("button", { name: "Logout" }).click();
+            // Select Building & Room
+            await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+            const roomButton = page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false });
+            await expect(roomButton).toBeVisible();
+            await roomButton.click();
+
+            // Select Time Slot 4 ("01:00 PM - 02:15 PM")
+            await page.getByRole("button", { name: "01:00 PM - 02:15 PM", exact: false }).click();
+
+            // Fill Purpose & Submit
+            await page.getByPlaceholder("e.g., Society meeting").fill(purpose);
+            await page.getByRole("button", { name: "Submit Request" }).click();
+            await expect(page.getByText("Reservation submitted successfully!")).toBeVisible();
+            await page.getByRole("button", { name: "Logout" }).click();
+        };
+
+        // --- STEP 1: Student A creates booking ---
+        await submitStudentRequest(USERS.student.erp, USERS.student.password, purposeA);
+
+        // --- STEP 2: Student B creates overlapping booking ---
+        await submitStudentRequest(USERS.student2.erp, USERS.student2.password, purposeB);
 
         // --- STEP 3: PO Approves Student A ---
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.goto("/");
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
-        // Find the row for Student A and Approve
+        // Find row for Student A and click Approve
         const rowA = page.locator("tr", { hasText: purposeA });
         await rowA.getByRole("button", { name: "Approve" }).click();
-        await expect(page.getByText("Booking approved successfully!")).toBeVisible();
+        await expect(page.getByText("Reservation request formally approved.")).toBeVisible();
 
         // --- STEP 4: Verify Student B is automatically Rejected ---
-        // Switch to the 'Rejected' tab
         await page.getByRole("button", { name: "Rejected" }).click();
 
-        // Assert that Student B's request is now here
-        const rowB = page.locator("tr", { hasText: purposeB });
+        // Assert Student B exists in the Rejected list
+        const rowB = page.locator("tr", { hasText: USERS.student2.erp });
         await expect(rowB).toBeVisible();
-        await expect(rowB).toContainText("rejected");
+        await expect(rowB.locator(".badge")).toHaveText(/rejected/i);
+        await expect(rowB).toContainText(purposeB);
     });
 });

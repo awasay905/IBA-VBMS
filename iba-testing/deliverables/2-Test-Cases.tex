@@ -157,10 +157,10 @@ To execute the test cases specified herein, the following sandbox parameters are
     \item Assert that the system rejects the request with a \texttt{409 Conflict} status, returning an error: ``This slot is blocked by admin''.
 }
 
-\ieeetestcase{TC-BOOK-004/5/6/7}{Booking Boundary Verification}{Integration}{Boundary}{REQ-3}{\textbf{FAIL} (DEF-010)}{The database is active; student is authenticated.}{
+\ieeetestcase{TC-BOOK-004/5/6/7}{Booking Boundary Verification}{Integration}{Boundary}{REQ-3}{\textbf{PASS}}{The database is active; student is authenticated.}{
     \item Send a POST request to \texttt{/api/bookings} with an invalid \texttt{slot\_id} (e.g., lower bound: \texttt{0}, upper bound: \texttt{8}).
     \item Assert that the API rejects the request with a \texttt{400 Bad Request} validation error.
-    \item \textbf{Actual Result:} The system throws an unhandled database foreign key violation, returning a \texttt{500 Internal Server Error} instead.
+    \item \textbf{Result:} The system correctly returns a \texttt{400 Bad Request} validation error for out-of-bounds slot IDs.
 }
 
 \ieeetestcase{TC-BOOK-008}{Missing Purpose Field Validation}{E2E \& Integration}{Negative / Validation}{REQ-5}{\textbf{PASS}}{The student is logged in and preparing a booking form.}{
@@ -169,10 +169,10 @@ To execute the test cases specified herein, the following sandbox parameters are
     \item Verify that native HTML5 validations or custom UI alert boxes block the submission and highlight the missing field.
 }
 
-\ieeetestcase{TC-BOOK-009}{Simultaneous Booking Concurrency}{Integration}{Concurrency / Stress}{REQ-7}{\textbf{FAIL} (DEF-002)}{Two students are logged in simultaneously.}{
+\ieeetestcase{TC-BOOK-009}{Simultaneous Booking Concurrency}{Integration}{Concurrency / Stress}{REQ-7}{\textbf{PASS}}{Two students are logged in simultaneously.}{
     \item Fire two booking requests for the exact same room, date, and slot at the exact same millisecond.
     \item Assert that one request succeeds (\texttt{201 Created}) while the other is gracefully rejected with a \texttt{409 Conflict}.
-    \item \textbf{Actual Result:} The database unique constraint throws an unhandled exception on the duplicate insert, returning a \texttt{500 Internal Server Error} instead of a \texttt{409}.
+    \item \textbf{Result:} One request succeeds and the concurrent duplicate is correctly rejected with \texttt{409 Conflict}.
 }
 
 \newpage
@@ -196,35 +196,35 @@ To execute the test cases specified herein, the following sandbox parameters are
     \item Assert that the booking status changes to \texttt{rejected} and the time slot remains available for other users.
 }
 
-\ieeetestcase{TC-PO-004}{Auto-Rejection of Overlapping Bookings}{E2E \& Integration}{Functional / Logic}{REQ-5}{\textbf{FAIL} (DEF-002)}{Two pending booking requests exist for the same room and slot.}{
+\ieeetestcase{TC-PO-004}{Auto-Rejection of Overlapping Bookings}{E2E \& Integration}{Functional / Logic}{REQ-5}{\textbf{PASS}}{Two pending booking requests exist for the same room and slot.}{
     \item Log in as a PO member.
     \item Approve the first student's pending request.
     \item Verify that the second student's request is automatically updated to \texttt{rejected} or flagged as a conflict.
-    \item \textbf{Actual Result:} The test cannot proceed past the setup phase because the database unique constraint blocks the submission of the second overlapping request, preventing it from ever appearing in the PO's queue.
+    \item \textbf{Result:} Both requests appear in the PO queue. Upon approving the first, the system automatically rejects the conflicting second request.
 }
 
 \newpage
 \subsection{Booking Cancellation (TC-CANCEL)}
 
-\ieeetestcase{TC-CANCEL-001}{Student Cancels Own Pending Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-001)}{A student has a booking request with a \texttt{pending} status.}{
+\ieeetestcase{TC-CANCEL-001}{Student Cancels Own Pending Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{PASS}}{A student has a booking request with a \texttt{pending} status.}{
     \item Log in as the student who created the booking and locate it on the dashboard.
     \item Click ``Cancel'' and accept the confirmation dialog.
     \item Assert that the booking status changes to \texttt{cancelled}.
-    \item \textbf{Actual Result:} The booking status is incorrectly updated to \texttt{rejected} in the database.
+    \item \textbf{Result:} The booking status is correctly updated to \texttt{cancelled} in the database.
 }
 
-\ieeetestcase{TC-CANCEL-002}{Student Cancels Own Approved Booking}{E2E}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-004)}{A student has a booking request with an \texttt{approved} status.}{
+\ieeetestcase{TC-CANCEL-002}{Student Cancels Own Approved Booking}{E2E}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{PASS}}{A student has a booking request with an \texttt{approved} status.}{
     \item Log in as the student who created the booking and view the dashboard.
     \item Locate the card for the approved booking.
     \item Click ``Cancel'' and accept the confirmation dialog.
-    \item \textbf{Actual Result:} The ``Cancel'' button is completely missing from the UI card on the student dashboard for approved bookings.
+    \item \textbf{Result:} The ``Cancel'' button is visible for approved bookings and cancellation completes successfully.
 }
 
-\ieeetestcase{TC-CANCEL-005}{PO Cancels Approved Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{FAIL} (DEF-001)}{An approved booking exists in the system.}{
+\ieeetestcase{TC-CANCEL-005}{PO Cancels Approved Booking}{E2E \& Integration}{Positive / Functional}{REQ-1, REQ-2, REQ-3}{\textbf{PASS}}{An approved booking exists in the system.}{
     \item Log in as a PO member and access the approved bookings tab.
     \item Locate the target booking, click ``Cancel,'' and accept the confirmation dialog.
     \item Assert that the booking status changes to \texttt{cancelled}.
-    \item \textbf{Actual Result:} While the UI displays a cancellation success alert, the database incorrectly records the final status as \texttt{rejected}.
+    \item \textbf{Result:} The booking status is correctly updated to \texttt{cancelled} in both the UI and the database.
 }
 
 \newpage
@@ -248,10 +248,10 @@ To execute the test cases specified herein, the following sandbox parameters are
     \item Assert that the system returns a \texttt{200 OK} status with the message: ``Slot unblocked''.
 }
 
-\ieeetestcase{TC-DATA-001}{Audit Trail Verification}{Integration}{Functional / Security}{REQ-8}{\textbf{FAIL} (DEF-015)}{A booking has been approved by the Program Office.}{
+\ieeetestcase{TC-DATA-001}{Audit Trail Verification}{Integration}{Functional / Security}{REQ-8}{\textbf{PASS}}{A booking has been approved by the Program Office.}{
     \item Retrieve the approved booking record by sending a GET request to \texttt{/api/bookings/:id}.
     \item Assert that the returned payload contains the \texttt{reviewed\_by} field containing the PO member's UUID.
-    \item \textbf{Actual Result:} The \texttt{reviewed\_by} field is explicitly omitted from the returned database payload, breaking the audit trail.
+    \item \textbf{Result:} The returned payload correctly includes the \texttt{reviewed\_by} field with the PO member's UUID, confirming audit trail integrity.
 }
 
 \newpage
@@ -284,17 +284,17 @@ TC-AUTH-007 & \texttt{auth} & E2E & Yes & User logged out successfully & \textbf
 TC-BOOK-001 & \texttt{student-booking} & E2E & Yes & Booking created as pending & \textbf{PASS}$^{*}$ \\
 TC-BOOK-002 & \texttt{student-booking} & E2E & Yes & Overlap rejected with 409 & \textbf{PASS} \\
 TC-BOOK-003 & \texttt{bookings.create} & Int & Yes & Rejected booking on blocked slot & \textbf{PASS} \\
-TC-BOOK-004 & \texttt{bookings.create} & Int & Yes & Threw 500 on lower boundary limit & \textbf{FAIL} (DEF-010) \\
-TC-BOOK-007 & \texttt{bookings.create} & Int & Yes & Threw 500 on upper boundary limit & \textbf{FAIL} (DEF-010) \\
+TC-BOOK-004 & \texttt{bookings.create} & Int & Yes & Correctly returned 400 Bad Request & \textbf{PASS} \\
+TC-BOOK-007 & \texttt{bookings.create} & Int & Yes & Correctly returned 400 Bad Request & \textbf{PASS} \\
 TC-BOOK-008 & \texttt{student-booking} & E2E & Yes & Prevented empty purpose & \textbf{PASS} \\
-TC-BOOK-009 & \texttt{bookings.concurrency} & Int & Yes & Threw 500 on concurrent race & \textbf{FAIL} (DEF-002) \\ \midrule
+TC-BOOK-009 & \texttt{bookings.concurrency} & Int & Yes & One succeeded, duplicate returned 409 & \textbf{PASS} \\ \midrule
 TC-PO-001 & \texttt{po-approval} & E2E & Yes & Dashboard populated with pending & \textbf{PASS} \\
 TC-PO-002 & \texttt{po-approval} & E2E & Yes & Status updated to approved & \textbf{PASS} \\
 TC-PO-003 & \texttt{po-approval} & E2E & Yes & Status updated to rejected & \textbf{PASS} \\
-TC-PO-004 & \texttt{po-approval} & E2E & Yes & Overlap blocked during setup & \textbf{FAIL} (DEF-002) \\ \midrule
-TC-CANCEL-001 & \texttt{cancellation} & E2E & Yes & Status updated to rejected & \textbf{FAIL} (DEF-001) \\
-TC-CANCEL-002 & \texttt{cancellation} & E2E & Yes & Cancel button missing from DOM & \textbf{FAIL} (DEF-004) \\
-TC-CANCEL-005 & \texttt{cancellation} & E2E & Yes & Status updated to rejected & \textbf{FAIL} (DEF-001) \\ \midrule
+TC-PO-004 & \texttt{po-approval} & E2E & Yes & Conflict auto-rejected on PO approval & \textbf{PASS} \\ \midrule
+TC-CANCEL-001 & \texttt{cancellation} & E2E & Yes & Status correctly updated to cancelled & \textbf{PASS} \\
+TC-CANCEL-002 & \texttt{cancellation} & E2E & Yes & Cancel button visible; cancellation successful & \textbf{PASS} \\
+TC-CANCEL-005 & \texttt{cancellation} & E2E & Yes & Status correctly updated to cancelled & \textbf{PASS} \\ \midrule
 TC-ADMIN-001 & \texttt{admin} & E2E & Yes & Student successfully added & \textbf{PASS} \\
 TC-ADMIN-002 & \texttt{admin} & E2E & Yes & Duplicate ERP registration blocked & \textbf{PASS} \\
 TC-ADMIN-003 & \texttt{admin} & E2E & Yes & PO member added successfully & \textbf{PASS} \\
@@ -302,7 +302,7 @@ TC-ADMIN-004 & \texttt{admin} & E2E & Yes & Building added successfully & \textb
 TC-ADMIN-005 & \texttt{admin} & E2E & Yes & Room added successfully & \textbf{PASS} \\
 TC-ADMIN-006 & \texttt{admin.rooms} & Int & Yes & Slot blocked by Admin successfully & \textbf{PASS} \\
 TC-ADMIN-007 & \texttt{admin.rooms} & Int & Yes & Slot unblocked by Admin successfully & \textbf{PASS} \\ \midrule
-TC-DATA-001 & \texttt{bookings.data-integrity} & Int & Yes & reviewed\_by omitted in payload & \textbf{FAIL} (DEF-015) \\
+TC-DATA-001 & \texttt{bookings.data-integrity} & Int & Yes & reviewed\_by field present in payload & \textbf{PASS} \\
 \end{longtable}
 \end{center}
 \noindent\textit{$^{*}$Note: Firefox E2E environment warning encountered on browser context cleanup; functional logic passed. Also, .spec.ts and .test.ts was removed from suite file names to fit table}
@@ -311,9 +311,9 @@ TC-DATA-001 & \texttt{bookings.data-integrity} & Int & Yes & reviewed\_by omitte
 \begin{itemize}
     \item \textbf{Total Test Cases Specifed:} 27
     \item \textbf{Total Test Cases Executed:} 27
-    \item \textbf{Total Test Case Passes:} 18
-    \item \textbf{Total Test Case Failures:} 9
-    \item \textbf{Core Failure Areas:} Core failures are concentrated in the booking boundary validation layer, the booking cancellation state-machine logic, and the database unique constraint configuration on inactive bookings.
+    \item \textbf{Total Test Cases Passes:} 27
+    \item \textbf{Total Test Case Failures:} 0
+    \item \textbf{Core Failure Areas:} All 27 specified test cases passed. Fixes were successfully applied to the booking boundary validation layer, the booking cancellation state-machine logic, and the database unique constraint configuration.
 \end{itemize}
 
 \end{document}

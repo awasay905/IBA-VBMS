@@ -69,7 +69,7 @@ describe("BookingsService", () => {
             // 1st check: blocked slot (returns null - not blocked)
             blockedBuilder.single.mockResolvedValueOnce({ data: null, error: null });
             // 2nd check: conflicting booking (returns null - no active booking conflicts)
-            bookingsBuilder.single.mockResolvedValueOnce({ data: null, error: null });
+            bookingsBuilder.then.mockImplementationOnce((resolve) => resolve({ data: [], error: null }));
             // 3rd statement: insert result (returns newly created booking object)
             bookingsBuilder.single.mockResolvedValueOnce({ data: mockCreatedBooking, error: null });
 
@@ -112,7 +112,8 @@ describe("BookingsService", () => {
         });
 
         // Test Case 6: Slot Already Booked (TC-BOOK-002)
-        it("should reject creation and throw ConflictException if slot has a pending or approved booking (TC-BOOK-002)", async () => {
+        it("sshould reject creation and throw ConflictException if I already have a pending booking (TC-BOOK-002)", async () => {
+            const userId = "student-123";
             const dto: CreateBookingDto = {
                 room_id: "room-abc",
                 date: "2026-06-01",
@@ -122,10 +123,13 @@ describe("BookingsService", () => {
 
             // 1st check: slot is not blocked
             blockedBuilder.single.mockResolvedValueOnce({ data: null, error: null });
-            // 2nd check: slot has an active conflict (returns existing booking ID)
-            bookingsBuilder.single.mockResolvedValueOnce({ data: { id: "existing-booking-id" }, error: null });
+            // Conflict check: return ARRAY containing MY OWN previous request
+            bookingsBuilder.then.mockImplementationOnce((resolve) => resolve({ 
+                data: [{ id: "prev-id", user_id: userId, status: "pending" }], 
+                error: null 
+            }));
 
-            await expect(service.create("student-123", dto)).rejects.toThrow(ConflictException);
+            await expect(service.create(userId, dto)).rejects.toThrow(ConflictException);
 
             // Confirm flow halted before insert
             expect(bookingsBuilder.insert).not.toHaveBeenCalled();
@@ -177,20 +181,22 @@ describe("BookingsService", () => {
         });
 
         // Test Case 9: Successful Booking Cancellation (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)
-        it("should successfully cancel a booking and update status to 'rejected' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)", async () => {
+        it("should successfully cancel a booking and update status to 'cancelled' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005)", async () => {
             const requesterId = "student-a";
             const requesterRole = "student";
             const targetBookingId = "booking-123";
 
             const mockDbBooking = {
                 id: targetBookingId,
-                status: "approved",
-                users: { id: requesterId }, // Authorized owner
+                status: "pending",
+                date: "2026-01-01",
+                users: { id: "student-a" }, // Owned by student-a
+                time_slots: { start_time: "08:30" }
             };
 
             const mockCancelledBooking = {
                 ...mockDbBooking,
-                status: "rejected", // Acts as cancelled
+                status: "cancelled",
                 reviewed_by: requesterId,
             };
 
@@ -202,7 +208,7 @@ describe("BookingsService", () => {
             const result = await service.cancel(targetBookingId, requesterId, requesterRole);
 
             expect(mockQueryBuilder.update).toHaveBeenCalledWith({
-                status: "rejected",
+                status: "cancelled",
                 reviewed_by: requesterId,
             });
             expect(mockQueryBuilder.eq).toHaveBeenLastCalledWith("id", targetBookingId);
