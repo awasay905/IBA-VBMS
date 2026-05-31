@@ -20,56 +20,63 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
 
     async function createStudentBooking(page: Page, purpose: string) {
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        // Updated Login Selectors
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-        await page.getByRole("combobox").nth(1).selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(formattedDate);
-        await page.getByRole("combobox").nth(2).selectOption("5"); // Slot 5
-        await page.getByPlaceholder("Describe the activity...").fill(purpose);
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
-        const successAlert = page.getByText("Booking request submitted successfully!");
-        const errorAlert = page.locator(".alert-error");
+        // 1. Move to the booking tab inside Student Dashboard
+        await page.getByRole("button", { name: "New Request" }).click();
 
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking submission failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // 2. Select Date from Calendar (Navigate months if 12 days in future crosses monthly boundary)
+        const targetMonthName = futureDate.toLocaleString("default", { month: "long" });
+        const targetYear = futureDate.getFullYear();
+        const expectedMonthHeader = `${targetMonthName} ${targetYear}`;
+
+        while (!(await page.getByText(expectedMonthHeader).isVisible())) {
+            // Click visual chevron-right to navigate calendar month
+            await page.getByRole("button").nth(5).click();
+        }
+        await page.getByRole("button", { name: String(futureDate.getDate()), exact: true }).click();
+
+        // 3. Select Building and Room
+        await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+        await page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false }).click();
+
+        // 4. Select Time Slot 5 ("02:30 PM - 03:45 PM")
+        await page.getByRole("button", { name: "02:30 PM - 03:45 PM", exact: false }).click();
+
+        // 5. Fill out Purpose Description
+        await page.getByPlaceholder("e.g., Society meeting").fill(purpose);
+
+        // 6. Click Submit Request inside the summary panel
+        await page.getByRole("button", { name: "Submit Request" }).click();
+
+        // 7. Verify Toast notification message
+        const successAlert = page.getByText("Reservation submitted successfully!");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
     }
 
     test("TC-CANCEL-001 — student cancels own pending booking", async ({ page }) => {
         await createStudentBooking(page, bookingPurpose);
 
+        // Explicitly switch view tab to list of reservations
+        await page.getByRole("button", { name: "My Reservations" }).click();
+
         // 1. Locate the card for this specific booking
         const bookingCard = page.locator(".card", { hasText: bookingPurpose });
 
-        // 2. Handle the window.confirm dialog that the React code triggers
-        page.on("dialog", (dialog) => dialog.accept());
-
-        // 3. Click Cancel inside that card
+        // 2. Trigger the cancellation (No window.confirm is raised now)
         await bookingCard.getByRole("button", { name: "Cancel" }).click();
 
-        // 4. Verify the success alert
-        const successAlert = page.getByText("Booking cancelled successfully");
-        const errorAlert = page.locator(".alert-error");
+        // 3. Click "Yes" in the custom React inline confirm block
+        await bookingCard.getByRole("button", { name: "Yes" }).click();
 
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking cancellation failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // 4. Verify Toast notification
+        const successAlert = page.getByText("Reservation cancelled.");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
 
-        // 5. Verify the status badge updated
-        // NOTE: This will fail if DEF-001 is not fixed (showing 'rejected' instead of 'cancelled')
+        // 5. Verify status badge
         await expect(bookingCard.locator(".badge")).toHaveText(/cancelled/i);
     });
 
@@ -79,37 +86,28 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
 
         // 1. Login as PO to Approve it
         await page.getByRole("button", { name: "Logout" }).click();
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         const pendingRow = page.locator("tr", { hasText: purpose });
         await pendingRow.getByRole("button", { name: "Approve" }).click();
-        await expect(page.getByText("Booking approved successfully!")).toBeVisible();
+        await expect(page.getByText("Reservation request formally approved.")).toBeVisible();
         await page.getByRole("button", { name: "Logout" }).click();
 
         // 2. Login back as Student
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
-        // 3. Locate the card and attempt to cancel
+        // 3. Locate card and trigger cancellation
         const bookingCard = page.locator(".card", { hasText: purpose });
-        page.on("dialog", (dialog) => dialog.accept());
         await bookingCard.getByRole("button", { name: "Cancel" }).click();
+        await bookingCard.getByRole("button", { name: "Yes" }).click(); // Click custom inline confirm
 
-        // 4. Verify the success alert
-        const successAlert = page.getByText("Booking cancelled successfully");
-        const errorAlert = page.locator(".alert-error");
-
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking cancellation failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
+        // 4. Verify success toast notification
+        const successAlert = page.getByText("Reservation cancelled.");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
     });
 
     test("TC-CANCEL-005 — PO cancels an approved booking", async ({ page }) => {
@@ -118,37 +116,25 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
         await page.getByRole("button", { name: "Logout" }).click();
 
         // 2. Login as PO and Approve it first
-        await page.getByLabel("ERP / Username").fill(USERS.po.erp);
-        await page.getByLabel("Password").fill(USERS.po.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.po.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.po.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
         const pendingRow = page.locator("tr", { hasText: "PO Kill Test" });
         await pendingRow.getByRole("button", { name: "Approve" }).click();
-        await expect(page.getByText("Booking approved successfully!")).toBeVisible();
+        await expect(page.getByText("Reservation request formally approved.")).toBeVisible();
 
         // 3. Switch to Approved tab
         await page.getByRole("button", { name: "Approved" }).click();
 
-        // 4. Handle confirmation dialog
-        page.on("dialog", (dialog) => dialog.accept());
-
-        // 5. Cancel the approved booking
+        // 4. Cancel (Revoke) the approved booking
         const approvedRow = page.locator("tr", { hasText: "PO Kill Test" });
-        await approvedRow.getByRole("button", { name: "Cancel" }).click();
+        await approvedRow.getByRole("button", { name: "Revoke" }).click(); // Approved status changes action name to "Revoke"
+        await approvedRow.getByRole("button", { name: "Yes" }).click(); // Confirm via row-nested inline action
 
-        // 6. Verify movement to Rejected/Cancelled state
-        const successAlert = page.getByText("Booking cancelled successfully");
-        const errorAlert = page.locator(".alert-error");
-
-        await expect(async () => {
-            const errorVisible = await errorAlert.isVisible();
-            if (errorVisible) {
-                const errorText = await errorAlert.textContent();
-                throw new Error(`Booking cancellation failed with UI error: "${errorText}"`);
-            }
-            await expect(successAlert).toBeVisible({ timeout: 10000 });
-        }).toPass({ timeout: 20000 });
-
+        // 5. Verify toast notification and movement of row to appropriate state
+        const successAlert = page.getByText("Reservation cancelled and slot released.");
+        await expect(successAlert).toBeVisible({ timeout: 10000 });
         await expect(approvedRow).toBeHidden();
 
         // Move to Cancelled Tab
@@ -159,33 +145,36 @@ test.describe("CANCELLATION (TC-CANCEL)", () => {
     });
 
     test("TC-CANCEL-003/004 — Boundary: past/future logic check", async ({ page }) => {
-        // NOTE: Your current backend logic does not strictly check time (HH:mm) for cancellations.
-        // It only checks if the status is 'pending' or 'approved'.
-        // This test serves as a check for the business rule: "Cannot cancel after start time".
+        const today = new Date();
+        const todayDay = today.getDate();
 
-        // 1. Create a booking for TODAY
-        const today = new Date().toISOString().split("T")[0];
+        // 1. Initiate portal session as Student
         await page.goto("/");
-        await page.getByLabel("ERP / Username").fill(USERS.student.erp);
-        await page.getByLabel("Password").fill(USERS.student.password);
-        await page.getByRole("button", { name: "Sign In" }).click();
+        await page.getByPlaceholder("e.g. 12345").fill(USERS.student.erp);
+        await page.getByPlaceholder("Enter your password").fill(USERS.student.password);
+        await page.getByRole("button", { name: "Sign In to Portal" }).click();
 
-        // Manually fill to use Today's date
-        await page.getByRole("combobox").first().selectOption(BUILDINGS.testBuilding.id);
-        await page.getByRole("combobox").nth(1).selectOption(ROOMS.testRoomA.id);
-        await page.locator('input[type="date"]').fill(today);
-        await page.getByRole("combobox").nth(2).selectOption("1"); // 8:30 AM (Likely in the past during a workday run)
-        await page.getByPlaceholder("Describe the activity...").fill("Late Cancel Test");
-        await page.getByRole("button", { name: "Submit Booking Request" }).click();
+        // 2. Load Booking form
+        await page.getByRole("button", { name: "New Request" }).click();
 
-        // If the system allows booking and immediate cancellation of an 8:30 AM slot at 2:00 PM,
-        // then the "Boundary" requirement is NOT being enforced by the backend.
+        // 3. Click current day directly on structural calendar
+        await page.getByRole("button", { name: String(todayDay), exact: true }).click();
+
+        // 4. Select location parameters
+        await page.locator("select").first().selectOption(BUILDINGS.testBuilding.id);
+        await page.getByRole("button", { name: ROOMS.testRoomA.name, exact: false }).click();
+
+        // 5. Select 08:30 AM Slot
+        await page.getByRole("button", { name: "08:30 AM - 9:45 AM", exact: false }).click();
+        await page.getByPlaceholder("e.g., Society meeting").fill("Late Cancel Test");
+        await page.getByRole("button", { name: "Submit Request" }).click();
+
+        // Switch back to reservations list view
+        await page.getByRole("button", { name: "My Reservations" }).click();
         const card = page.locator(".card", { hasText: "Late Cancel Test" });
-
-        // If the button is visible and works, the boundary rule (TC-CANCEL-004) is failing.
         const cancelBtn = card.getByRole("button", { name: "Cancel" });
 
-        // This is an "Observation" check:
+        // Observation check
         const isEnforced = await cancelBtn.isHidden();
         console.log(isEnforced ? "Boundary enforced: Cancel hidden" : "Boundary NOT enforced: Cancel visible");
     });
