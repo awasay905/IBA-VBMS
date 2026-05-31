@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../api";
 import { Toaster, toast } from "sonner";
 import {
@@ -592,20 +593,51 @@ export default function PODashboard() {
                         >
                             <ChevronLeft size={14} />
                         </button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className="btn w-8 h-8 rounded-lg text-xs font-semibold"
-                                style={{
-                                    background: currentPage === i + 1 ? "var(--iba-red)" : "var(--bg-surface)",
-                                    color: currentPage === i + 1 ? "white" : "var(--text-secondary)",
-                                    border: `1px solid ${currentPage === i + 1 ? "var(--iba-red)" : "var(--border-base)"}`,
-                                }}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
+                        {(() => {
+                            const pages = [];
+                            const delta = 1; // neighbours around current page
+                            const rangeStart = Math.max(2, currentPage - delta);
+                            const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+
+                            // Always show page 1
+                            pages.push(1);
+
+                            // Left ellipsis
+                            if (rangeStart > 2) pages.push("...");
+
+                            // Middle range
+                            for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
+
+                            // Right ellipsis
+                            if (rangeEnd < totalPages - 1) pages.push("...");
+
+                            // Always show last page
+                            if (totalPages > 1) pages.push(totalPages);
+
+                            return pages.map((p, idx) =>
+                                p === "..." ? (
+                                    <span
+                                        key={`ellipsis-${idx}`}
+                                        className="w-8 h-8 flex items-center justify-center text-xs text-[var(--text-muted)] select-none"
+                                    >
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className="btn w-8 h-8 rounded-lg text-xs font-semibold"
+                                        style={{
+                                            background: currentPage === p ? "var(--iba-red)" : "var(--bg-surface)",
+                                            color: currentPage === p ? "white" : "var(--text-secondary)",
+                                            border: `1px solid ${currentPage === p ? "var(--iba-red)" : "var(--border-base)"}`,
+                                        }}
+                                    >
+                                        {p}
+                                    </button>
+                                ),
+                            );
+                        })()}
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage((p) => p + 1)}
@@ -618,8 +650,8 @@ export default function PODashboard() {
             )}
 
             {/* ── 5. Detail Modal ── */}
-            {selectedBooking && (
-                <div className="pt-40 fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs fade-in">
+            {selectedBooking && createPortal(
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm fade-in">
                     <div className="card w-full max-w-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-strong)] rounded-2xl relative shadow-lg">
                         <div className="bg-[var(--iba-red)] px-6 py-5 text-white relative">
                             <div className="absolute inset-0 bg-brand-pattern opacity-[0.05] pointer-events-none" />
@@ -752,7 +784,7 @@ export default function PODashboard() {
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
         </div>
     );
 }

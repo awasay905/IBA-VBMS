@@ -1107,20 +1107,42 @@ export default function AdminDashboard() {
                         >
                             <ChevronLeft size={14} />
                         </button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className="btn w-8 h-8 rounded-lg text-xs font-semibold"
-                                style={{
-                                    background: currentPage === i + 1 ? "var(--iba-red)" : "var(--bg-surface)",
-                                    color: currentPage === i + 1 ? "white" : "var(--text-secondary)",
-                                    border: `1px solid ${currentPage === i + 1 ? "var(--iba-red)" : "var(--border-base)"}`,
-                                }}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
+                        {(() => {
+                            const pages = [];
+                            const delta = 1;
+                            const rangeStart = Math.max(2, currentPage - delta);
+                            const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+
+                            pages.push(1);
+                            if (rangeStart > 2) pages.push("...");
+                            for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i);
+                            if (rangeEnd < totalPages - 1) pages.push("...");
+                            if (totalPages > 1) pages.push(totalPages);
+
+                            return pages.map((p, idx) =>
+                                p === "..." ? (
+                                    <span
+                                        key={`ellipsis-${idx}`}
+                                        className="w-8 h-8 flex items-center justify-center text-xs text-[var(--text-muted)] select-none"
+                                    >
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className="btn w-8 h-8 rounded-lg text-xs font-semibold"
+                                        style={{
+                                            background: currentPage === p ? "var(--iba-red)" : "var(--bg-surface)",
+                                            color: currentPage === p ? "white" : "var(--text-secondary)",
+                                            border: `1px solid ${currentPage === p ? "var(--iba-red)" : "var(--border-base)"}`,
+                                        }}
+                                    >
+                                        {p}
+                                    </button>
+                                ),
+                            );
+                        })()}
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage((p) => p + 1)}

@@ -883,7 +883,7 @@ export default function StudentDashboard({ user }) {
 
                     {/* Right Sticky Reservation Slip Ticket Column */}
                     <div className="lg:col-span-4 lg:sticky lg:top-6 space-y-4">
-                        <div className="card overflow-hidden bg-white dark:bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-2xl relative">
+                        <div className="card overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-2xl relative">
                             {/* Visual Jagged Ticket Header divider decorative line */}
                             <div className="bg-[var(--iba-red)] px-5 py-4 text-white relative">
                                 <div className="absolute inset-0 bg-brand-pattern opacity-[0.05] pointer-events-none" />
