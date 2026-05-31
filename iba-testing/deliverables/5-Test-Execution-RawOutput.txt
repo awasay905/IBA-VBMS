@@ -309,7 +309,7 @@ Running one project: integration
     Expected path: "reviewed_by"
     Received path: []
 
-    Received value: {"created_at": "2026-05-28T13:24:45.989357+00:00", "date": "2026-10-10", "id": "e6e0d27c-b0d7-48ef-962d-694ad330d0de", "purpose": "Audit Trail Test", "rooms": {"buildings": {"id": "99999999-9999-4999-8999-999999999999", "name": "Test Building"}, "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "name": "Test Room A"}, "slot_id": 2, "status": "approved", "time_slots": {"end_time": "11:15", "id": 2, "label": "10:00 – 11:15", "start_time": "10:00"}, "updated_at": "2026-05-28T13:24:47.351504+00:00", "users": {"email": "student@test.com", "erp": "test-student", "id": "3989aea0-b903-4aff-95bb-de0b7773916d", "name": "Test Student"}}
+    Received value: {"created_at": "2026-05-28T13:24:45.989357+00:00", "date": "2026-10-10", "id": "e6e0d27c-b0d7-48ef-962d-694ad330d0de", "purpose": "Audit Trail Test", "rooms": {"buildings": {"id": "99999999-9999-4999-8999-999999999999", "name": "Test Building"}, "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "name": "Test Room A"}, "slot_id": 2, "status": "approved", "time_slots": {"end_time": "11:15", "id": 2, "label": "10:00 - 11:15", "start_time": "10:00"}, "updated_at": "2026-05-28T13:24:47.351504+00:00", "users": {"email": "student@test.com", "erp": "test-student", "id": "3989aea0-b903-4aff-95bb-de0b7773916d", "name": "Test Student"}}
 
       51 |             .get(`/api/bookings/${bookingId}`)
       52 |             .set("Authorization", `Bearer ${studentToken}`)

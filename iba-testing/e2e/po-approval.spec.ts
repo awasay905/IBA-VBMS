@@ -80,7 +80,7 @@ test.describe("PO (TC-PO)", () => {
         // Perform inner assertions scoped strictly inside the new booking card
         await expect(newBookingCard.getByRole("heading", { name: "Test Room A" })).toBeVisible();
         await expect(newBookingCard.getByText("Test Building")).toBeVisible();
-        await expect(newBookingCard.locator("span").filter({ hasText: ":30 – 12:45" })).toBeVisible();
+        await expect(newBookingCard.locator("span").filter({ hasText: ":30 - 12:45" })).toBeVisible();
         await expect(newBookingCard.getByText("pending")).toBeVisible();
         await expect(newBookingCard.getByText(shortMonth, { exact: true })).toBeVisible();
         await expect(newBookingCard.getByText(day.toString(), { exact: true })).toBeVisible();
@@ -154,7 +154,7 @@ test.describe("PO (TC-PO)", () => {
         await expect(approvedRow).toContainText("approved");
 
         // Fix: Use the correct time string for slot 3
-        await expect(approvedRow).toContainText("11:30 – 12:45");
+        await expect(approvedRow).toContainText("11:30 - 12:45");
     });
 
     test("TC-PO-003 — reject a pending request", async ({ page }) => {
@@ -203,12 +203,12 @@ test.describe("PO (TC-PO)", () => {
         await expect(rejectedRow).toContainText("rejected");
 
         // Fix: Use the correct time string for slot 3
-        await expect(rejectedRow).toContainText("11:30 – 12:45");
+        await expect(rejectedRow).toContainText("11:30 - 12:45");
     });
 
     test("TC-PO-004 — conflict resolution: auto-reject overlapping requests", async ({ page }) => {
         const dateForConflict = formatted; // Using the same date as other tests
-        const slotForConflict = "4"; // Using slot 4 (13:00 – 14:15)
+        const slotForConflict = "4"; // Using slot 4 (13:00 - 14:15)
         const purposeA = "Student A - High Priority Meeting";
         const purposeB = "Student B - Overlapping Request";
 

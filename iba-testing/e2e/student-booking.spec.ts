@@ -77,7 +77,7 @@ test.describe("Booking (TC-Book)", () => {
         // Perform inner assertions scoped strictly inside the new booking card
         await expect(newBookingCard.getByRole("heading", { name: "Test Room A" })).toBeVisible();
         await expect(newBookingCard.getByText("Test Building")).toBeVisible();
-        await expect(newBookingCard.locator("span").filter({ hasText: ":30 – 12:45" })).toBeVisible();
+        await expect(newBookingCard.locator("span").filter({ hasText: ":30 - 12:45" })).toBeVisible();
         await expect(newBookingCard.getByText("pending")).toBeVisible();
         await expect(newBookingCard.getByText(shortMonth, { exact: true })).toBeVisible();
         await expect(newBookingCard.getByText(day.toString(), { exact: true })).toBeVisible();

@@ -161,11 +161,11 @@ useEffect(() => {
 ### Submit a Booking
 
 ```js
-// slot_id is the integer ID (1–7), not the label
+// slot_id is the integer ID (1-7), not the label
 await api.bookings.create({
   room_id: selectedRoomId,   // UUID from DB
   date:    selectedDate,     // "2025-06-10"
-  slot_id: selectedSlotId,   // 1–7
+  slot_id: selectedSlotId,   // 1-7
   purpose: purposeText,
 });
 ```
