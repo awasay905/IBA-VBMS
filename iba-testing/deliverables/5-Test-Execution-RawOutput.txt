@@ -1,82 +1,137 @@
-PS C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing> npm run test:all
+PS C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing> npm run db:init;npm run db:seed
+
+> iba-testing@1.0.0 db:init
+> ts-node scripts/seedDb.ts --init
+
+◇ injected env (8) from .env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Connected to Supabase. Mode: --init
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\init.sql
+Executing SQL...
+✅ Successfully executed init.sql
+
+> iba-testing@1.0.0 db:seed
+> ts-node scripts/seedDb.ts --seed
+
+◇ injected env (8) from .env.test // tip: ⌘ suppress logs { quiet: true }
+Connected to Supabase. Mode: --seed
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
+Executing SQL...
+✅ Successfully executed seedTestData.sql
+PS C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing> npm run test:all               
 
 > iba-testing@1.0.0 test:all
-> npm run test:unit & npm run test:integration & npm run test:e2e
+> npm run db:init && npm run db:seed && npm run test:unit && npm run test:integration && npm run test:e2e
 
+
+> iba-testing@1.0.0 db:init
+> ts-node scripts/seedDb.ts --init
+
+◇ injected env (8) from .env.test // tip: ⌘ suppress logs { quiet: true }
+Connected to Supabase. Mode: --init
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\init.sql
+Executing SQL...
+✅ Successfully executed init.sql
+
+> iba-testing@1.0.0 db:seed
+> ts-node scripts/seedDb.ts --seed
+
+◇ injected env (8) from .env.test // tip: ⌘ enable debugging { debug: true }
+Connected to Supabase. Mode: --seed
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
+Executing SQL...
+✅ Successfully executed seedTestData.sql
 
 > iba-testing@1.0.0 test:unit
 > jest --selectProjects unit --passWithNoTests
 
 Running one project: unit
- PASS   unit  unit/buildings.service.test.ts
-  BuildingsService
-    √ should allow an admin to successfully create a new building with location (TC-ADMIN-004) (9 ms)
-    √ should default location to an empty string when location is omitted in DTO (3 ms)
-    √ should retrieve all buildings along with their room collections sorted by name (3 ms)
-    √ should retrieve a single building by ID along with its rooms (3 ms)
-    √ should throw a NotFoundException if building is not found (5 ms)
-    √ should delete a building record which triggers cascading deletions on related rooms (1 ms)
-    √ should throw the database error when remove fails due to a constraint violation (5 ms)
+ PASS   unit  unit/bookings.service.test.ts
+  BookingsService
+    create()
+      √ should successfully create a pending booking if no conflicts exist (TC-BOOK-001) (12 ms)
+      √ should reject creation and throw ConflictException if the slot is blocked by admin (TC-BOOK-003) (5 ms)
+      √ sshould reject creation and throw ConflictException if I already have a pending booking (TC-BOOK-002) (4 ms)
+    cancel() and updateStatus() validations
+      √ should block a student from cancelling another user's booking (TC-CANCEL-001 safety guard) (2 ms)
+      √ should reject cancellation of bookings that are already rejected or cancelled (TC-CANCEL-004 safety guard) (6 ms)
+      √ should successfully cancel a booking and update status to 'cancelled' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005) (3 ms)
+    findAll() and findOne()
+      √ should find bookings with specific filters (2 ms)
+      √ should throw NotFoundException if findOne query is missing or empty (2 ms)
 
  PASS   unit  unit/users.service.test.ts
   UsersService
-    √ should allow an admin to successfully create a new student account (TC-ADMIN-001) (4 ms)
-    √ should allow an admin to successfully create a new program office account (TC-ADMIN-003) (2 ms)
-    √ should reject creation and throw a ConflictException if the ERP already exists (TC-ADMIN-002) (2 ms)
+    √ should allow an admin to successfully create a new student account (TC-ADMIN-001) (3 ms)
+    √ should allow an admin to successfully create a new program office account (TC-ADMIN-003) (1 ms)
+    √ should reject creation and throw a ConflictException if the ERP already exists (TC-ADMIN-002) (3 ms)
     √ should retrieve all user records ordered by creation date (2 ms)
-    √ should find a user by ID (1 ms)
+    √ should find a user by ID (2 ms)
     √ should throw a NotFoundException if user id does not exist (1 ms)
-    √ should delete a user record by ID (1 ms)
+    √ should delete a user record by ID (2 ms)
+
+ PASS   unit  unit/buildings.service.test.ts
+  BuildingsService
+    √ should allow an admin to successfully create a new building with location (TC-ADMIN-004) (4 ms)
+    √ should default location to an empty string when location is omitted in DTO (1 ms)
+    √ should retrieve all buildings along with their room collections sorted by name (6 ms)
+    √ should retrieve a single building by ID along with its rooms (2 ms)
+    √ should throw a NotFoundException if building is not found (2 ms)
+    √ should delete a building record which triggers cascading deletions on related rooms (1 ms)
+    √ should throw the database error when remove fails due to a constraint violation (2 ms)
 
  PASS   unit  unit/rooms.service.test.ts
   RoomsService
     √ should fetch availability datasets (TC-BOOK-002 / TC-BOOK-003 supporting logic) (3 ms)
-    √ should retrieve rooms filtered by building ID when provided (3 ms)
+    √ should retrieve rooms filtered by building ID when provided (2 ms)
     √ should retrieve a single room by ID (1 ms)
     √ should throw a NotFoundException if the room does not exist (2 ms)
-    √ should successfully create a new room entry (TC-ADMIN-005) (2 ms)
+    √ should successfully create a new room entry (TC-ADMIN-005) (1 ms)
     √ should successfully delete a room entry (1 ms)
-
- PASS   unit  unit/bookings.service.test.ts
-  BookingsService
-    create()
-      √ should successfully create a pending booking if no conflicts exist (TC-BOOK-001) (2 ms)
-      √ should reject creation and throw ConflictException if the slot is blocked by admin (TC-BOOK-003) (2 ms)
-      √ should reject creation and throw ConflictException if slot has a pending or approved booking (TC-BOOK-002) (1 ms)
-    cancel() and updateStatus() validations
-      √ should block a student from cancelling another user's booking (TC-CANCEL-001 safety guard) (2 ms)
-      √ should reject cancellation of bookings that are already rejected or cancelled (TC-CANCEL-004 safety guard) (1 ms)
-      √ should successfully cancel a booking and update status to 'rejected' (TC-CANCEL-001 / TC-CANCEL-002 / TC-CANCEL-005) (2 ms)
-    findAll() and findOne()
-      √ should find bookings with specific filters (1 ms)
-      √ should throw NotFoundException if findOne query is missing or empty (2 ms)
 
  PASS   unit  unit/blocked-slots.service.test.ts
   BlockedSlotsService
-    √ should bulk-block slots with an explicit reason (TC-ADMIN-006) (2 ms)
+    √ should bulk-block slots with an explicit reason (TC-ADMIN-006) (3 ms)
     √ should default to 'Admin Block' when no reason is specified TC-ADMIN-006 (Edge Case / Default Handling) (1 ms)
-    √ should find all blocked slots with room and date filters applied TC-ADMIN-006 and TC-BOOK-003 (1 ms)
+    √ should find all blocked slots with room and date filters applied TC-ADMIN-006 and TC-BOOK-003 (2 ms)
     √ should delete a blocked slot entry by its ID TC-ADMIN-007 (1 ms)
-    √ should call upsert without throwing when a slot_id is already blocked (TC-ADMIN-006 idempotency) (1 ms)
-    √ should throw database error when query execution fails (3 ms)
+    √ should call upsert without throwing when a slot_id is already blocked (TC-ADMIN-006 idempotency) (2 ms)
+    √ should throw database error when query execution fails (2 ms)
 
  PASS   unit  unit/auth.service.test.ts
   AuthService
-    √ should throw UnauthorizedException if user does not exist (TC-AUTH-003 partial) (3 ms)
-    √ should throw UnauthorizedException if password does not match (TC-AUTH-003) (2 ms)
+    √ should throw UnauthorizedException if user does not exist (TC-AUTH-003 partial) (4 ms)
+    √ should throw UnauthorizedException if password does not match (TC-AUTH-003) (1 ms)
     √ should return an access token and student profile on valid student credentials (TC-AUTH-001) (1 ms)
-    √ should return an access token and PO profile on valid PO credentials (TC-AUTH-002) (1 ms)
+    √ should return an access token and PO profile on valid PO credentials (TC-AUTH-002) (2 ms)
     √ should correctly call bcrypt to hash a plain text password (2 ms)
 
 Test Suites: 6 passed, 6 total
 Tests:       39 passed, 39 total
 Snapshots:   0 total
-Time:        2.016 s
+Time:        2.314 s
 Ran all test suites.
 
 > iba-testing@1.0.0 test:integration
-> jest --selectProjects integration --runInBand
+> npm run db:init && npm run db:seed && jest --selectProjects integration --runInBand
 
+
+> iba-testing@1.0.0 db:init
+> ts-node scripts/seedDb.ts --init
+
+◇ injected env (8) from .env.test // tip: ⌁ auth for agents [www.vestauth.com]
+Connected to Supabase. Mode: --init
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\init.sql
+Executing SQL...
+✅ Successfully executed init.sql
+
+> iba-testing@1.0.0 db:seed
+> ts-node scripts/seedDb.ts --seed
+
+◇ injected env (8) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
+Connected to Supabase. Mode: --seed
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
+Executing SQL...
+✅ Successfully executed seedTestData.sql
 Running one project: integration
   console.log
     [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
@@ -103,85 +158,17 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- FAIL   integration  integration/bookings.cancel.test.ts (18.744 s)
+ PASS   integration  integration/bookings.cancel.test.ts (15.719 s)
   Booking Cancellation Feature
-    × TC-CANCEL-001: student cancels own pending booking (2501 ms)
-    × TC-CANCEL-002: student cancels own approved booking (2335 ms)
-    × TC-CANCEL-005: PO cancels approved booking (2311 ms)
-    √ should block a student from cancelling another student's booking (1719 ms)
-    √ should prevent cancelling an already rejected/cancelled booking (1892 ms)
-    × SHOULD allow re-booking a cancelled slot (Proves DEF-001) (3277 ms)
-
-  ● Booking Cancellation Feature › TC-CANCEL-001: student cancels own pending booking
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "cancelled"
-    Received: "rejected"
-
-      44 |         // 2. Student cancels their own pending booking
-      45 |         const cancelRes = await request(BASE_URL)
-    > 46 |             .patch(`/api/bookings/${bookingId}/cancel`)
-         |                                       ^
-      47 |             .set("Authorization", `Bearer ${studentToken}`)
-      48 |             .expect(200);
-      49 |
-
-      at Object.<anonymous> (integration/bookings.cancel.test.ts:46:39)
-
-  ● Booking Cancellation Feature › TC-CANCEL-002: student cancels own approved booking
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "cancelled"
-    Received: "rejected"
-
-      70 |         // 2. Approve the booking as PO
-      71 |         await request(BASE_URL)
-    > 72 |             .patch(`/api/bookings/${bookingId}/approve`)
-         |                                       ^
-      73 |             .set("Authorization", `Bearer ${poToken}`)
-      74 |             .expect(200);
-      75 |
-
-      at Object.<anonymous> (integration/bookings.cancel.test.ts:72:39)
-
-  ● Booking Cancellation Feature › TC-CANCEL-005: PO cancels approved booking
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: "cancelled"
-    Received: "rejected"
-
-       96 |                 purpose: "PO Cancellation Study",
-       97 |             })
-    >  98 |             .expect(201);
-          |                                       ^
-       99 |
-      100 |         const bookingId = createRes.body.id;
-      101 |
-
-      at Object.<anonymous> (integration/bookings.cancel.test.ts:98:39)
-
-  ● Booking Cancellation Feature › SHOULD allow re-booking a cancelled slot (Proves DEF-001)
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 201
-    Received: 500
-
-      156 |             .patch(`/api/bookings/${bookingId}/reject`)
-      157 |             .set("Authorization", `Bearer ${poToken}`)
-    > 158 |             .expect(200);
-          |                              ^
-      159 |
-      160 |         // 3. Attempt to cancel the rejected booking
-      161 |         await request(BASE_URL)
-
-      at Object.<anonymous> (integration/bookings.cancel.test.ts:158:30)
+    √ TC-CANCEL-001: student cancels own pending booking (1951 ms)
+    √ TC-CANCEL-002: student cancels own approved booking (2404 ms)
+    √ TC-CANCEL-005: PO cancels approved booking (2399 ms)
+    √ should block a student from cancelling another student's booking (1370 ms)
+    √ should prevent cancelling an already rejected/cancelled booking (1721 ms)
+    √ SHOULD allow re-booking a cancelled slot (Proves DEF-001) (2727 ms)
 
   console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
 
       at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
 
@@ -205,76 +192,18 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- FAIL   integration  integration/bookings.create.test.ts (16.03 s)
+ PASS   integration  integration/bookings.create.test.ts (8.98 s)
   Student Room Booking Creation Feature
-    √ TC-BOOK-001: happy path (creates a pending booking when no conflicts exist) (1189 ms)
-    √ TC-BOOK-002: duplicate slot rejected (cannot book an already booked slot) (2139 ms)
-    √ TC-BOOK-003: blocked slot rejected (cannot book a slot blocked by an administrator) (759 ms)
-    × TC-BOOK-004 to 007: Boundary test — should reject out-of-bounds slot_ids with 400 Bad Request (2725 ms)
+    √ TC-BOOK-001: happy path (creates a pending booking when no conflicts exist) (1027 ms)
+    √ TC-BOOK-002: duplicate slot rejected (cannot book an already booked slot) (1705 ms)
+    √ TC-BOOK-003: blocked slot rejected (cannot book a slot blocked by an administrator) (689 ms)
+    √ TC-BOOK-004 to 007: Boundary test — should reject out-of-bounds slot_ids with 400 Bad Request (6 ms)
     √ TC-BOOK-008: missing purpose field rejected with validation error (3 ms)
-    × past date rejected (should block bookings on previous dates) (1266 ms)
-    × BUG: Cancelled/Rejected slots should be re-bookable but are blocked by DB constraints (3406 ms)
-
-  ● Student Room Booking Creation Feature › TC-BOOK-004 to 007: Boundary test — should reject out-of-bounds slot_ids with 400 Bad Request
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 400
-    Received: 500
-
-      120 |         // 2. Upper Boundary (slot_id: 8) - Maps to time after 6:45 PM
-      121 |         const resUpper = await request(BASE_URL)
-    > 122 |             .post("/api/bookings")
-          |                                 ^
-      123 |             .set("Authorization", `Bearer ${studentToken}`)
-      124 |             .send({
-      125 |                 room_id: roomAId,
-
-      at Object.<anonymous> (integration/bookings.create.test.ts:122:33)
-
-  ● Student Room Booking Creation Feature › past date rejected (should block bookings on previous dates)
-
-    expected 400 "Bad Request", got 201 "Created"
-
-      148 |                 slot_id: 5,
-      149 |                 // 'purpose' is intentionally omitted
-    > 150 |             })
-          |              ^
-      151 |             .expect(400);
-      152 |     });
-      153 |
-
-      at Object.<anonymous> (integration/bookings.create.test.ts:150:14)
-      ----
-      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
-      at node_modules/supertest/lib/test.js:365:13
-      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
-      at Test.assert (node_modules/supertest/lib/test.js:195:23)
-      at localAssert (node_modules/supertest/lib/test.js:138:14)
-      at node_modules/supertest/lib/test.js:156:7
-      at Test.Request.callback (node_modules/superagent/lib/node/index.js:847:12)
-      at node_modules/superagent/lib/node/index.js:1102:18
-      at IncomingMessage.<anonymous> (node_modules/superagent/lib/node/parsers/json.js:21:7)
-
-  ● Student Room Booking Creation Feature › BUG: Cancelled/Rejected slots should be re-bookable but are blocked by DB constraints
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 201
-    Received: 500
-
-      171 |         const slot = 1;
-      172 |
-    > 173 |         // 1. Student 1 books a slot
-          |                             ^
-      174 |         const res1 = await request(BASE_URL)
-      175 |             .post("/api/bookings")
-      176 |             .set("Authorization", `Bearer ${studentToken}`)
-
-      at Object.<anonymous> (integration/bookings.create.test.ts:173:29)
+    √ past date rejected (should block bookings on previous dates) (2 ms)
+    √ BUG: Cancelled/Rejected slots should be re-bookable but are blocked by DB constraints (2738 ms)
 
   console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: ⚙️  enable debug logging with { debug: true }
 
       at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
 
@@ -298,28 +227,13 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- FAIL   integration  integration/bookings.data-integrity.test.ts (7.406 s)
-  Data Integrity & Audit Trail (TC-DATA-001)
-    × TC-DATA-001: should maintain accurate audit trail (updated_at) across booking lifecycle (3124 ms)
-
-  ● Data Integrity & Audit Trail (TC-DATA-001) › TC-DATA-001: should maintain accurate audit trail (updated_at) across booking lifecycle
-
-    expect(received).toHaveProperty(path)
-
-    Expected path: "reviewed_by"
-    Received path: []
-
-    Received value: {"created_at": "2026-05-28T13:24:45.989357+00:00", "date": "2026-10-10", "id": "e6e0d27c-b0d7-48ef-962d-694ad330d0de", "purpose": "Audit Trail Test", "rooms": {"buildings": {"id": "99999999-9999-4999-8999-999999999999", "name": "Test Building"}, "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "name": "Test Room A"}, "slot_id": 2, "status": "approved", "time_slots": {"end_time": "11:15", "id": 2, "label": "10:00 - 11:15", "start_time": "10:00"}, "updated_at": "2026-05-28T13:24:47.351504+00:00", "users": {"email": "student@test.com", "erp": "test-student", "id": "3989aea0-b903-4aff-95bb-de0b7773916d", "name": "Test Student"}}
-
-      51 |             .get(`/api/bookings/${bookingId}`)
-      52 |             .set("Authorization", `Bearer ${studentToken}`)
-    > 53 |             .expect(200);
-         |                             ^
-      54 |
-      55 |         // NOTE: This assertion will likely fail because 'reviewed_by' is omitted
-      56 |         // from the SELECT query in `bookings.service.ts`.
-
-      at Object.<anonymous> (integration/bookings.data-integrity.test.ts:53:29)
+ PASS   integration  integration/bookings.po.test.ts (7.362 s)
+  Program Office (PO) Booking Management Feature
+    √ TC-PO-001: PO successfully views the pending bookings list (345 ms)
+    √ should prevent students from approving booking requests (3 ms)
+    √ TC-PO-002: PO successfully approves a pending request (682 ms)
+    √ TC-PO-003: PO successfully rejects a pending request (345 ms)
+    √ TC-PO-004: Conflict Resolution architectural constraints evaluation (1717 ms)
 
   console.log
     [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
@@ -346,29 +260,12 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- FAIL   integration  integration/bookings.concurrency.test.ts (5.663 s)
-  Booking Concurrency Feature
-    × TC-BOOK-009: simultaneous booking requests for the exact same slot must result in exactly one success and one conflict failure (5594 ms)
-
-  ● Booking Concurrency Feature › TC-BOOK-009: simultaneous booking requests for the exact same slot must result in exactly one success and one conflict failure
-
-    expect(received).toContain(expected) // indexOf
-
-    Expected value: 409
-    Received array: [500, 201]
-
-      53 |         });
-      54 |
-    > 55 |         // 4. Assertions to confirm system data consistency:
-         |                          ^
-      56 |         // Exactly one student must successfully claim the slot (201 Created).
-      57 |         // Exactly one student must be rejected with a conflict error (409 Conflict).
-      58 |         expect(statuses.length).toBe(2);
-
-      at Object.<anonymous> (integration/bookings.concurrency.test.ts:55:26)
+ PASS   integration  integration/bookings.concurrency.test.ts (5.316 s)
+  PO Approval Concurrency
+    √ TC-BOOK-009: simultaneous approval of different requests for the same slot must result in one success and one conflict (5245 ms)
 
   console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
 
       at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
 
@@ -392,16 +289,12 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- PASS   integration  integration/bookings.po.test.ts (10.958 s)
-  Program Office (PO) Booking Management Feature
-    √ TC-PO-001: PO successfully views the pending bookings list (535 ms)
-    √ should prevent students from approving booking requests (2 ms)
-    √ TC-PO-002: PO successfully approves a pending request (430 ms)
-    √ TC-PO-003: PO successfully rejects a pending request (351 ms)
-    √ TC-PO-004: Conflict Resolution architectural constraints evaluation (2335 ms)
+ PASS   integration  integration/bookings.data-integrity.test.ts (5.253 s)
+  Data Integrity & Audit Trail (TC-DATA-001)
+    √ TC-DATA-001: should maintain accurate audit trail (updated_at) across booking lifecycle (3058 ms)
 
   console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
       at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
 
@@ -425,16 +318,16 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- PASS   integration  integration/admin.users.test.ts (6.164 s)
+ PASS   integration  integration/admin.users.test.ts
   Admin User Management Feature
-    √ TC-ADMIN-001: admin creates student and verifies DB persistence (1486 ms)
-    √ TC-ADMIN-003: admin creates PO member (971 ms)
+    √ TC-ADMIN-001: admin creates student and verifies DB persistence (1077 ms)
+    √ TC-ADMIN-003: admin creates PO member (735 ms)
     √ TC-ADMIN-002: duplicate ERP rejected (340 ms)
-    √ missing required field rejected with validation error (2 ms)
-    √ invalid email format rejected with validation error (2 ms)
+    √ missing required field rejected with validation error (3 ms)
+    √ invalid email format rejected with validation error (3 ms)
 
   console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
 
       at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
 
@@ -458,46 +351,13 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- PASS   integration  integration/auth.api.test.ts
-  Authentication Feature
-    √ TC-AUTH-001: student login returns token and user info without password (484 ms)
-    √ TC-AUTH-002: PO login returns token and program office role (393 ms)
-    √ TC-AUTH-003a: wrong password rejected (467 ms)
-    √ TC-AUTH-003b: unknown user rejected (341 ms)
-    √ empty body rejected with validation error (2 ms)
-
-  console.log
-    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
-
-      at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
-
-  console.log
-    Connected to Supabase.
-
-      at resetDatabase (integration/helpers/seed.helper.ts:25:17)
-
-  console.log
-    Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-
-      at resetDatabase (integration/helpers/seed.helper.ts:29:17)
-
-  console.log
-    Executing SQL...
-
-      at resetDatabase (integration/helpers/seed.helper.ts:32:17)
-
-  console.log
-    ✅ Successfully executed seedTestData.sql
-
-      at resetDatabase (integration/helpers/seed.helper.ts:35:17)
-
- PASS   integration  integration/admin.rooms.test.ts (6.531 s)
+ PASS   integration  integration/admin.rooms.test.ts
   Admin Facility and Slot Management Feature
-    √ TC-ADMIN-004: admin successfully adds a new building (424 ms)
-    √ TC-ADMIN-005: admin successfully adds a new room to the created building (381 ms)
-    √ TC-ADMIN-006 & TC-ADMIN-007: admin slot blocking and unblocking lifecycle (825 ms)
-    √ should reject room creation when capacity is not a positive integer (2 ms)
-    √ should reject room creation with an invalid room type (2 ms)
+    √ TC-ADMIN-004: admin successfully adds a new building (344 ms)
+    √ TC-ADMIN-005: admin successfully adds a new room to the created building (344 ms)
+    √ TC-ADMIN-006 & TC-ADMIN-007: admin slot blocking and unblocking lifecycle (690 ms)
+    √ should reject room creation when capacity is not a positive integer (4 ms)
+    √ should reject room creation with an invalid room type (3 ms)
 
   console.log
     [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
@@ -524,31 +384,64 @@ Running one project: integration
 
       at resetDatabase (integration/helpers/seed.helper.ts:35:17)
 
- PASS   integration  integration/auth.rbac.test.ts (5.253 s)
+ PASS   integration  integration/auth.rbac.test.ts
   Role-Based Access Control (RBAC) Security
     TC-AUTH-004: No Token Blocked
-      √ should block access to GET /api/bookings without a token (4 ms)
-      √ should block access to GET /api/buildings without a token (2 ms)
+      √ should block access to GET /api/bookings without a token (3 ms)
+      √ should block access to GET /api/buildings without a token (3 ms)
     TC-AUTH-005: Student Role Restrictions
       √ should block a student from creating users (POST /api/users) (3 ms)
-      √ should block a student from deleting a building (DELETE /api/buildings/:id) (2 ms)
+      √ should block a student from deleting a building (DELETE /api/buildings/:id) (3 ms)
     TC-AUTH-006: PO Role Restrictions
-      √ should block a PO member from creating users (POST /api/users) (2 ms)
+      √ should block a PO member from creating users (POST /api/users) (8 ms)
       √ should block a PO member from adding a building (POST /api/buildings) (2 ms)
     Student Authorized Actions
-      √ should allow a student to read buildings (GET /api/buildings) (441 ms)
-      √ should allow a student to read rooms (GET /api/rooms) (888 ms)
+      √ should allow a student to read buildings (GET /api/buildings) (343 ms)
+      √ should allow a student to read rooms (GET /api/rooms) (340 ms)
 
-Test Suites: 4 failed, 5 passed, 9 total
-Tests:       9 failed, 34 passed, 43 total
+  console.log
+    [dotenv@17.2.3] injecting env (8) from .env.test -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+      at _log (../iba-backend/node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Connected to Supabase.
+
+      at resetDatabase (integration/helpers/seed.helper.ts:25:17)
+
+  console.log
+    Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
+
+      at resetDatabase (integration/helpers/seed.helper.ts:29:17)
+
+  console.log
+    Executing SQL...
+
+      at resetDatabase (integration/helpers/seed.helper.ts:32:17)
+
+  console.log
+    ✅ Successfully executed seedTestData.sql
+
+      at resetDatabase (integration/helpers/seed.helper.ts:35:17)
+
+ PASS   integration  integration/auth.api.test.ts
+  Authentication Feature
+    √ TC-AUTH-001: student login returns token and user info without password (407 ms)
+    √ TC-AUTH-002: PO login returns token and program office role (395 ms)
+    √ TC-AUTH-003a: wrong password rejected (396 ms)
+    √ TC-AUTH-003b: unknown user rejected (342 ms)
+    √ empty body rejected with validation error (3 ms)
+
+Test Suites: 9 passed, 9 total
+Tests:       43 passed, 43 total
 Snapshots:   0 total
-Time:        81.538 s, estimated 82 s
+Time:        56.218 s
 Ran all test suites.
 
 > iba-testing@1.0.0 test:e2e
 > playwright test
 
-◇ injected env (8) from .env.test // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (8) from .env.test // tip: ⌘ suppress logs { quiet: true }
 Global Setup: Resetting Database for E2E tests...
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
@@ -557,47 +450,37 @@ Executing SQL...
 
 Running 42 tests using 1 worker
 
-◇ injected env (0) from .env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-  ✓   1 [chromium] › e2e\admin.spec.ts:11:9 › Admin Management (TC-ADMIN) › TC-ADMIN-001 — add student (5.7s)
-  ✓   2 [chromium] › e2e\admin.spec.ts:58:9 › Admin Management (TC-ADMIN) › TC-ADMIN-002 — add student with duplicate ERP (4.9s)
-  ✓   3 [chromium] › e2e\admin.spec.ts:93:9 › Admin Management (TC-ADMIN) › TC-ADMIN-003 — add po (5.4s)
-  ✓   4 [chromium] › e2e\admin.spec.ts:140:9 › Admin Management (TC-ADMIN) › TC-ADMIN-004 — add building (4.8s)
-  ✓   5 [chromium] › e2e\admin.spec.ts:182:9 › Admin Management (TC-ADMIN) › TC-ADMIN-005 — add room (5.5s)
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
-  ✓   6 [chromium] › e2e\auth.spec.ts:5:9 › Authentication (TC-AUTH) › TC-AUTH-001: Student Login (1.1s)
-  ✓   7 [chromium] › e2e\auth.spec.ts:14:9 › Authentication (TC-AUTH) › TC-AUTH-002: PO Login (1.1s)
-  ✓   8 [chromium] › e2e\auth.spec.ts:23:9 › Authentication (TC-AUTH) › TC-AUTH-003: Bad Credentials (1.0s)
-  ✓   9 [chromium] › e2e\auth.spec.ts:33:9 › Authentication (TC-AUTH) › TC-AUTH-004 — protected URL redirect (226ms)
-  ✓  10 [chromium] › e2e\auth.spec.ts:38:9 › Authentication (TC-AUTH) › TC-AUTH-007 — logout and back button (1.1s)
-  ✘  11 [chromium] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking (13.5s)
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
 ◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
-  ✘  12 [chromium] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) (30.6s)
+  ✓   1 [chromium] › e2e\admin.spec.ts:11:9 › Admin Management (TC-ADMIN) › TC-ADMIN-001 — add student (7.7s)
+  ✓   2 [chromium] › e2e\admin.spec.ts:58:9 › Admin Management (TC-ADMIN) › TC-ADMIN-002 — add student with duplicate ERP (7.4s)
+  ✓   3 [chromium] › e2e\admin.spec.ts:93:9 › Admin Management (TC-ADMIN) › TC-ADMIN-003 — add po (7.9s)
+  ✓   4 [chromium] › e2e\admin.spec.ts:140:9 › Admin Management (TC-ADMIN) › TC-ADMIN-004 — add building (7.2s)
+  ✓   5 [chromium] › e2e\admin.spec.ts:182:9 › Admin Management (TC-ADMIN) › TC-ADMIN-005 — add room (7.8s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
+  ✓   6 [chromium] › e2e\auth.spec.ts:5:9 › Authentication (TC-AUTH) › TC-AUTH-001: Student Login (3.1s)
+  ✓   7 [chromium] › e2e\auth.spec.ts:14:9 › Authentication (TC-AUTH) › TC-AUTH-002: PO Login (1.2s)
+  ✓   8 [chromium] › e2e\auth.spec.ts:23:9 › Authentication (TC-AUTH) › TC-AUTH-003: Bad Credentials (1.1s)
+  ✓   9 [chromium] › e2e\auth.spec.ts:34:9 › Authentication (TC-AUTH) › TC-AUTH-004 — protected URL redirect (338ms)
+  ✓  10 [chromium] › e2e\auth.spec.ts:40:9 › Authentication (TC-AUTH) › TC-AUTH-007 — logout and back button (2.2s)
+  ✓  11 [chromium] › e2e\cancellation.spec.ts:60:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking (7.3s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ⌘ enable debugging { debug: true }
-  ✓  13 [chromium] › e2e\cancellation.spec.ts:112:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-005 — PO cancels an approved booking (10.3s)
+  ✓  12 [chromium] › e2e\cancellation.spec.ts:83:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) (11.8s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  14 [chromium] › e2e\cancellation.spec.ts:142:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-003/004 — Boundary: past/future logic check (5.6s)
+  ✓  13 [chromium] › e2e\cancellation.spec.ts:113:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-005 — PO cancels an approved booking (10.1s)
+Connected to Supabase.
+Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
+Executing SQL...
+✅ Successfully executed seedTestData.sql
+  ✓  14 [chromium] › e2e\cancellation.spec.ts:147:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-003/004 — Boundary: past/future logic check (5.4s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
@@ -607,22 +490,22 @@ Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  15 [chromium] › e2e\po-approval.spec.ts:92:9 › PO (TC-PO) › TC-PO-001 — view pending requests (10.8s)
+  ✓  15 [chromium] › e2e\po-approval.spec.ts:78:9 › PO (TC-PO) › TC-PO-001 — view pending requests (8.2s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  16 [chromium] › e2e\po-approval.spec.ts:111:9 › PO (TC-PO) › TC-PO-002 — approve a pending request (12.3s)
+  ✓  16 [chromium] › e2e\po-approval.spec.ts:97:9 › PO (TC-PO) › TC-PO-002 — approve a pending request (9.5s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  17 [chromium] › e2e\po-approval.spec.ts:160:9 › PO (TC-PO) › TC-PO-003 — reject a pending request (13.2s)
+  ✓  17 [chromium] › e2e\po-approval.spec.ts:134:9 › PO (TC-PO) › TC-PO-003 — reject a pending request (9.3s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✘  18 [chromium] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests (19.5s)
+  ✓  18 [chromium] › e2e\po-approval.spec.ts:174:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests (19.3s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
@@ -631,55 +514,44 @@ Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
-  ✓  19 [chromium] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow (7.0s)
-  ✓  20 [chromium] › e2e\student-booking.spec.ts:86:9 › Booking (TC-Book) › TC-BOOK-002 — duplicate slot rejected (8.1s)
-  ✓  21 [chromium] › e2e\student-booking.spec.ts:137:9 › Booking (TC-Book) › TC-BOOK-008 — missing purpose (2.1s)
+  ✓  19 [chromium] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow (5.1s)
+  ✓  20 [chromium] › e2e\student-booking.spec.ts:80:9 › Booking (TC-Book) › TC-BOOK-002 — duplicate slot rejected (7.0s)
+  ✓  21 [chromium] › e2e\student-booking.spec.ts:138:9 › Booking (TC-Book) › TC-BOOK-008 — missing purpose (3.8s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ◈ encrypted .env [www.dotenvx.com]
-  ✓  22 [firefox] › e2e\admin.spec.ts:11:9 › Admin Management (TC-ADMIN) › TC-ADMIN-001 — add student (8.8s)
-  ✓  23 [firefox] › e2e\admin.spec.ts:58:9 › Admin Management (TC-ADMIN) › TC-ADMIN-002 — add student with duplicate ERP (7.6s)
-  ✓  24 [firefox] › e2e\admin.spec.ts:93:9 › Admin Management (TC-ADMIN) › TC-ADMIN-003 — add po (7.6s)
-  ✓  25 [firefox] › e2e\admin.spec.ts:140:9 › Admin Management (TC-ADMIN) › TC-ADMIN-004 — add building (7.0s)
-  ✓  26 [firefox] › e2e\admin.spec.ts:182:9 › Admin Management (TC-ADMIN) › TC-ADMIN-005 — add room (7.9s)
+◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
+  ✓  22 [firefox] › e2e\admin.spec.ts:11:9 › Admin Management (TC-ADMIN) › TC-ADMIN-001 — add student (10.4s)
+  ✓  23 [firefox] › e2e\admin.spec.ts:58:9 › Admin Management (TC-ADMIN) › TC-ADMIN-002 — add student with duplicate ERP (9.5s)
+  ✓  24 [firefox] › e2e\admin.spec.ts:93:9 › Admin Management (TC-ADMIN) › TC-ADMIN-003 — add po (9.9s)
+  ✓  25 [firefox] › e2e\admin.spec.ts:140:9 › Admin Management (TC-ADMIN) › TC-ADMIN-004 — add building (10.9s)
+  ✓  26 [firefox] › e2e\admin.spec.ts:182:9 › Admin Management (TC-ADMIN) › TC-ADMIN-005 — add room (9.9s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  27 [firefox] › e2e\auth.spec.ts:5:9 › Authentication (TC-AUTH) › TC-AUTH-001: Student Login (3.3s)
-  ✓  28 [firefox] › e2e\auth.spec.ts:14:9 › Authentication (TC-AUTH) › TC-AUTH-002: PO Login (3.3s)
+  ✓  27 [firefox] › e2e\auth.spec.ts:5:9 › Authentication (TC-AUTH) › TC-AUTH-001: Student Login (5.4s)
+  ✓  28 [firefox] › e2e\auth.spec.ts:14:9 › Authentication (TC-AUTH) › TC-AUTH-002: PO Login (3.6s)
   ✓  29 [firefox] › e2e\auth.spec.ts:23:9 › Authentication (TC-AUTH) › TC-AUTH-003: Bad Credentials (3.3s)
-  ✓  30 [firefox] › e2e\auth.spec.ts:33:9 › Authentication (TC-AUTH) › TC-AUTH-004 — protected URL redirect (2.4s)
-  ✓  31 [firefox] › e2e\auth.spec.ts:38:9 › Authentication (TC-AUTH) › TC-AUTH-007 — logout and back button (3.8s)
-  ✘  32 [firefox] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking (15.9s)
+  ✓  30 [firefox] › e2e\auth.spec.ts:34:9 › Authentication (TC-AUTH) › TC-AUTH-004 — protected URL redirect (2.4s)
+  ✓  31 [firefox] › e2e\auth.spec.ts:40:9 › Authentication (TC-AUTH) › TC-AUTH-007 — logout and back button (4.9s)
+  ✓  32 [firefox] › e2e\cancellation.spec.ts:60:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking (10.1s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
+  ✓  33 [firefox] › e2e\cancellation.spec.ts:83:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) (14.1s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ⌘ custom filepath { path: '/custom/path/.env' }
-  ✘  33 [firefox] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) (30.1s)
+  ✓  34 [firefox] › e2e\cancellation.spec.ts:113:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-005 — PO cancels an approved booking (12.3s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
-  ✓  34 [firefox] › e2e\cancellation.spec.ts:112:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-005 — PO cancels an approved booking (13.7s)
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
-  ✓  35 [firefox] › e2e\cancellation.spec.ts:142:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-003/004 — Boundary: past/future logic check (7.6s)
+  ✓  35 [firefox] › e2e\cancellation.spec.ts:147:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-003/004 — Boundary: past/future logic check (7.4s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
@@ -689,22 +561,22 @@ Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  36 [firefox] › e2e\po-approval.spec.ts:92:9 › PO (TC-PO) › TC-PO-001 — view pending requests (14.7s)
+  ✓  36 [firefox] › e2e\po-approval.spec.ts:78:9 › PO (TC-PO) › TC-PO-001 — view pending requests (10.0s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  37 [firefox] › e2e\po-approval.spec.ts:111:9 › PO (TC-PO) › TC-PO-002 — approve a pending request (18.2s)
+  ✓  37 [firefox] › e2e\po-approval.spec.ts:97:9 › PO (TC-PO) › TC-PO-002 — approve a pending request (11.2s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✓  38 [firefox] › e2e\po-approval.spec.ts:160:9 › PO (TC-PO) › TC-PO-003 — reject a pending request (16.9s)
+  ✓  38 [firefox] › e2e\po-approval.spec.ts:134:9 › PO (TC-PO) › TC-PO-003 — reject a pending request (10.9s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-  ✘  39 [firefox] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests (24.2s)
+  ✓  39 [firefox] › e2e\po-approval.spec.ts:174:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests (20.8s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
@@ -713,248 +585,15 @@ Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ⌘ override existing { override: true }
-  ✘  40 [firefox] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow (9.4s)
-Connected to Supabase.
-Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
-Executing SQL...
-✅ Successfully executed seedTestData.sql
-◇ injected env (0) from .env.test // tip: ⌁ auth for agents [www.vestauth.com]
-  ✓  41 [firefox] › e2e\student-booking.spec.ts:86:9 › Booking (TC-Book) › TC-BOOK-002 — duplicate slot rejected (11.7s)
-  ✓  42 [firefox] › e2e\student-booking.spec.ts:137:9 › Booking (TC-Book) › TC-BOOK-008 — missing purpose (5.0s)
+  ✓  40 [firefox] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow (7.8s)
+  ✓  41 [firefox] › e2e\student-booking.spec.ts:80:9 › Booking (TC-Book) › TC-BOOK-002 — duplicate slot rejected (8.7s)
+  ✓  42 [firefox] › e2e\student-booking.spec.ts:138:9 › Booking (TC-Book) › TC-BOOK-008 — missing purpose (5.7s)
 Connected to Supabase.
 Reading file: C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\test-data\seedTestData.sql
 Executing SQL...
 ✅ Successfully executed seedTestData.sql
 
-
-  1) [chromium] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking 
-
-    Error: expect(locator).toHaveText(expected) failed
-
-    Locator: locator('.card').filter({ hasText: 'Cancellation Test Purpose' }).locator('.badge')
-    Expected pattern: /cancelled/i
-    Received string:  "rejected"
-    Timeout: 5000ms
-
-    Call log:
-      - Expect "toHaveText" with timeout 5000ms
-      - waiting for locator('.card').filter({ hasText: 'Cancellation Test Purpose' }).locator('.badge')
-        5 × locator resolved to <span class="badge bg-amber-100 text-amber-800 border-amber-200">pending</span>
-          - unexpected value "pending"
-        9 × locator resolved to <span class="badge bg-red-100 text-red-800 border-red-200">rejected</span>
-          - unexpected value "rejected"
-
-
-      71 |         // 5. Verify the status badge updated
-      72 |         // NOTE: This will fail if DEF-001 is not fixed (showing 'rejected' instead of 'cancelled')
-    > 73 |         await expect(bookingCard.locator(".badge")).toHaveText(/cancelled/i);
-         |                                                     ^
-      74 |     });
-      75 |
-      76 |     test("TC-CANCEL-002 — student cancels own approved booking (DEF-004)", async ({ page }) => {
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\cancellation.spec.ts:73:53
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-chromium\error-context.md
-
-    Error Context: test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-chromium\error-context.md
-
-  2) [chromium] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) 
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('.card').filter({ hasText: 'Approved Cancellation Test' }).getByRole('button', { name: 'Cancel' })
-
-
-      104 |
-      105 |         // This action will Timeout/Fail because the button is missing from the DOM (DEF-004)
-    > 106 |         await bookingCard.getByRole("button", { name: "Cancel" }).click();
-          |                                                                   ^
-      107 |
-      108 |         // 4. Verify the success alert (Won't be reached until bug is fixed)
-      109 |         await expect(page.getByText("Booking cancelled successfully")).toBeVisible();
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\cancellation.spec.ts:106:67
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--chromium\error-context.md
-
-    Error Context: test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--chromium\error-context.md
-
-  3) [chromium] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests 
-
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: getByText('Booking request submitted successfully!')
-    Expected: visible
-    Timeout: 5000ms
-    Error: element(s) not found
-
-    Call log:
-      - Expect "toBeVisible" with timeout 5000ms
-      - waiting for getByText('Booking request submitted successfully!')
-
-
-      243 |
-      244 |         // This assertion expects the system to allow multiple "Pending" requests
-    > 245 |         await expect(page.getByText("Booking request submitted successfully!")).toBeVisible();
-          |                                                                                 ^
-      246 |         await page.getByRole("button", { name: "Logout" }).click();
-      247 |
-      248 |         // --- STEP 3: PO Approves Student A ---
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\po-approval.spec.ts:245:81
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-chromium\error-context.md
-
-    Error Context: test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-chromium\error-context.md
-
-  4) [firefox] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking 
-
-    Error: expect(locator).toHaveText(expected) failed
-
-    Locator: locator('.card').filter({ hasText: 'Cancellation Test Purpose' }).locator('.badge')
-    Expected pattern: /cancelled/i
-    Received string:  "rejected"
-    Timeout: 5000ms
-
-    Call log:
-      - Expect "toHaveText" with timeout 5000ms
-      - waiting for locator('.card').filter({ hasText: 'Cancellation Test Purpose' }).locator('.badge')
-        14 × locator resolved to <span class="badge bg-red-100 text-red-800 border-red-200">rejected</span>
-           - unexpected value "rejected"
-
-
-      71 |         // 5. Verify the status badge updated
-      72 |         // NOTE: This will fail if DEF-001 is not fixed (showing 'rejected' instead of 'cancelled')
-    > 73 |         await expect(bookingCard.locator(".badge")).toHaveText(/cancelled/i);
-         |                                                     ^
-      74 |     });
-      75 |
-      76 |     test("TC-CANCEL-002 — student cancels own approved booking (DEF-004)", async ({ page }) => {
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\cancellation.spec.ts:73:53
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-firefox\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-firefox\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-firefox\error-context.md
-
-    Error Context: test-results\cancellation-CANCELLATION--8ad91-cancels-own-pending-booking-firefox\error-context.md
-
-  5) [firefox] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) 
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('.card').filter({ hasText: 'Approved Cancellation Test' }).getByRole('button', { name: 'Cancel' })
-
-
-      104 |
-      105 |         // This action will Timeout/Fail because the button is missing from the DOM (DEF-004)
-    > 106 |         await bookingCard.getByRole("button", { name: "Cancel" }).click();
-          |                                                                   ^
-      107 |
-      108 |         // 4. Verify the success alert (Won't be reached until bug is fixed)
-      109 |         await expect(page.getByText("Booking cancelled successfully")).toBeVisible();
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\cancellation.spec.ts:106:67
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--firefox\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--firefox\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--firefox\error-context.md
-
-    Error Context: test-results\cancellation-CANCELLATION--43858-n-approved-booking-DEF-004--firefox\error-context.md
-
-  6) [firefox] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests 
-
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: getByText('Booking request submitted successfully!')
-    Expected: visible
-    Timeout: 5000ms
-    Error: element(s) not found
-
-    Call log:
-      - Expect "toBeVisible" with timeout 5000ms
-      - waiting for getByText('Booking request submitted successfully!')
-
-
-      243 |
-      244 |         // This assertion expects the system to allow multiple "Pending" requests
-    > 245 |         await expect(page.getByText("Booking request submitted successfully!")).toBeVisible();
-          |                                                                                 ^
-      246 |         await page.getByRole("button", { name: "Logout" }).click();
-      247 |
-      248 |         // --- STEP 3: PO Approves Student A ---
-        at C:\Users\abdul\softwaretesting\IBA-VBMS\iba-testing\e2e\po-approval.spec.ts:245:81
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-firefox\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-firefox\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-firefox\error-context.md
-
-    Error Context: test-results\po-approval-PO-TC-PO-TC-PO-25415-reject-overlapping-requests-firefox\error-context.md
-
-  7) [firefox] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow 
-
-    Error: browserContext.close: Protocol error (Browser.removeBrowserContext): can't access property "_maybeDontRestoreTabs", this._windows[aWindow.__SSi] is undefined
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    test-results\student-booking-Booking-TC-40885-OOK-001-—-full-booking-flow-firefox\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: test-results\student-booking-Booking-TC-40885-OOK-001-—-full-booking-flow-firefox\error-context.md
-
-    Error Context: test-results\student-booking-Booking-TC-40885-OOK-001-—-full-booking-flow-firefox\error-context.md
-
-  7 failed
-    [chromium] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking 
-    [chromium] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) 
-    [chromium] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests 
-    [firefox] › e2e\cancellation.spec.ts:46:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-001 — student cancels own pending booking 
-    [firefox] › e2e\cancellation.spec.ts:76:9 › CANCELLATION (TC-CANCEL) › TC-CANCEL-002 — student cancels own approved booking (DEF-004) 
-    [firefox] › e2e\po-approval.spec.ts:209:9 › PO (TC-PO) › TC-PO-004 — conflict resolution: auto-reject overlapping requests 
-    [firefox] › e2e\student-booking.spec.ts:11:9 › Booking (TC-Book) › TC-BOOK-001 — full booking flow 
-  35 passed (7.3m)
+  42 passed (5.8m)
 
 To open last HTML report run:
 
